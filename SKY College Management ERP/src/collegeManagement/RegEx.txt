@@ -1,0 +1,126 @@
+This is a regular expression (regex) pattern commonly used to validate email addresses. Let’s break it down step by step to understand its meaning:
+
+Full Regex Pattern:
+regex
+Copy code
+[a-zA-Z0-9._%+-]{6,}+@[a-zA-Z0-9.-]{4,}+\\.[a-zA-Z]{3,}
+
+
+Breakdown of the Components:
+1. [a-zA-Z0-9._%+-]{6,}+
+This part matches the local part of an email address (everything before the @ symbol).
+[a-zA-Z0-9._%+-]: Specifies the allowed characters:
+a-z: Lowercase letters
+A-Z: Uppercase letters
+0-9: Digits
+._%+-: Special characters . (dot), _ (underscore), % (percent), + (plus), and - (hyphen).
+{6,}: Requires at least 6 characters (no upper limit specified).
++: Ensures a possessive quantifier, meaning it will not backtrack to find other matches once it consumes characters.
+
+
+2. @[a-zA-Z0-9.-]{4,}+
+This part matches the domain name (everything after the @ symbol and before the . in the domain).
+[a-zA-Z0-9.-]: Specifies the allowed characters:
+a-z: Lowercase letters
+A-Z: Uppercase letters
+0-9: Digits
+. (dot) and - (hyphen) are also allowed.
+{4,}: Requires at least 4 characters for the domain.
++: Again, the possessive quantifier.
+
+
+3. \\.[a-zA-Z]{3,}
+This part matches the top-level domain (everything after the last dot, e.g., .com, .org).
+\\.: Matches the literal dot (.).
+[a-zA-Z]: Allows only letters (uppercase or lowercase) for the domain extension.
+{3,}: Requires at least 3 characters for the top-level domain (e.g., com, org, info).
+
+
+
+Meaning as a Whole:
+This pattern validates email addresses with the following conditions:
+
+1.The local part (before @) must:
+
+Be at least 6 characters long.
+Contain only letters, digits, dots, underscores, %, +, or -.
+2.The domain name (after @) must:
+
+Be at least 4 characters long.
+Contain only letters, digits, dots, or hyphens.
+3.The top-level domain (after the last .) must:
+
+Contain only letters.
+Be at least 3 characters long.
+
+
+
+Example Matches:
+✅ example.email+info@domain-name123.org
+✅ user_123%info@abcd.com
+✅ my.name-is_valid@mydomain.info
+Non-Matching Examples:
+❌ a@b.c (Local part and domain too short, top-level domain less than 3 characters).
+❌ user@domain-name (Missing top-level domain).
+❌ invalid@domain..com (Two consecutive dots are invalid unless additional checks are applied).
+
+
+
+Notes:
+The possessive quantifiers (+) in {6,}+ and {4,}+ prevent unnecessary backtracking, which can improve performance in some cases.
+This regex assumes that additional validation (e.g., no consecutive dots or invalid hyphen placements) is handled elsewhere, as regex 
+alone can't enforce all email rules.
+
+
+Analysis of fwmaai@gmail.cmm:
+Local Part: fwmaai
+
+Matches [a-zA-Z0-9._%+-]{6,}:
+Contains 6 valid characters (f, w, m, a, a, i).
+✅ Valid
+Domain Name: gmail
+
+Matches [a-zA-Z0-9.-]{4,}:
+Contains 5 valid characters (g, m, a, i, l).
+✅ Valid
+Top-Level Domain: cmm
+
+Matches \\.[a-zA-Z]{3,}:
+The top-level domain starts with a literal dot (.), and the characters after it (cmm) are alphabetic and at least 3 characters long.
+✅ Valid
+
+
+
+
+Problem: Possessive Quantifiers in the Regex
+The possessive quantifiers (+) used in {6,}+ and {4,}+ prevent backtracking, which can cause issues in some cases. Here’s why:
+
+In this regex, possessive quantifiers prevent the pattern from retrying and reallocating characters between sections of the email 
+address (local part, domain, and TLD) during the matching process.
+In your case, the regex treats the m in cmm as part of the domain name (gmail) rather than the TLD (.cmm). This causes the TLD 
+validation to fail because it looks like it doesn’t start with a dot (.).
+
+
+
+Solution:
+1. Remove Possessive Quantifiers (+): Change the regex from:
+
+regex
+Copy code
+[a-zA-Z0-9._%+-]{6,}+@[a-zA-Z0-9.-]{4,}+\\.[a-zA-Z]{3,}
+To:
+
+regex
+Copy code
+[a-zA-Z0-9._%+-]{6,}@[a-zA-Z0-9.-]{4,}\\.[a-zA-Z]{3,}
+2. Fixed Regex Explanation:
+
+Removing the possessive quantifiers allows backtracking to reallocate characters properly between the domain and TLD if needed.
+
+Testing with the Modified Regex:
+Now, the email fwmaai@gmail.cmm will match because:
+
+The local part (fwmaai), domain name (gmail), and TLD (cmm) satisfy the regex rules.
+Best Practices:
+To avoid issues with possessive quantifiers, use them only when you're confident no backtracking will be required. For email 
+validation, consider avoiding them entirely unless performance optimization is critical.
