@@ -11,6 +11,7 @@ public class testClassB {
 	     
 	     // Call the method from ClassA
 	     obj.displayMessage();
+	     System.out.println("hi Second commit");
 	 }
 }
 
