@@ -1,6 +1,8 @@
 package collegeManagement;
 
 import jdbcGUI.LoginDB;
+import temp2.DatabaseSchemaCreator;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -228,13 +230,10 @@ public class Login extends JFrame implements ActionListener {
         bdatabase.setForeground(Color.BLACK);
         bdatabase.setFont(new Font("Tahoma", Font.BOLD, 16));
         bdatabase.addActionListener(this);
-        add( bdatabase);
-     // Check if this is the first time the project is run
-        if (isFirstRun()) {
-            bdatabase.setEnabled(true); // Enable the button on first run
-        } else {
-            bdatabase.setEnabled(false); // Disable the button afterward
-        }
+        add( bdatabase);   
+        
+     // Set visibility based on database button state
+        toggleButtonsVisibility(isDatabaseVisible());
         
         lb7 = new JLabel("Copyright @ BYTE CODERS. All rights reserved. ");
         lb7.setBounds(150, 600, 680, 30);
@@ -276,8 +275,10 @@ public class Login extends JFrame implements ActionListener {
 		}
 		else if (ae.getSource() == bdatabase )
 		{
-			new DataBase();
+			Database.createDatabaseSchema();
             disableDatabaseButton(); // Disable the button after it's clicked
+           // toggleButtonsVisibility(false);
+            toggleButtonsVisibility(isDatabaseVisible());
 		}
 	}
 	
@@ -473,9 +474,32 @@ public class Login extends JFrame implements ActionListener {
         return false;
     }
 
+    /*
+    private boolean isDatabaseVisible() {
+   	 // Check if this is the first time the project is run
+       if (isFirstRun()) {
+         //  bdatabase.setEnabled(true); // Enable the button on first run
+         //  bdatabase.setVisible(true);
+           return true;
+       } else {
+           //  bdatabase.setEnabled(false); // Disable the button afterward
+         //  bdatabase.setVisible(false);
+           return false;
+       }
+  
+   }
+    */
+    
+    private boolean isDatabaseVisible() {
+        File file = new File(FLAG_FILE);
+        return !file.exists();
+       // return file.exists();
+    }
+    
     // Method to disable the "Database" button and persist the state
     private void disableDatabaseButton() {
         bdatabase.setEnabled(false);
+        bdatabase.setVisible(false);
 
         try {
             // Update the flag file to mark that the button has been used
@@ -488,6 +512,14 @@ public class Login extends JFrame implements ActionListener {
     }
  
     
+    private void toggleButtonsVisibility(boolean isDatabaseVisible) {
+        blogin.setVisible(!isDatabaseVisible);
+        bcancel.setVisible(!isDatabaseVisible);
+        bforget.setVisible(!isDatabaseVisible);
+        bdatabase.setVisible(isDatabaseVisible);
+    }
+    
+   
     
     private void showLoadingIndicator() {
         loadingDialog = new JDialog(this, "Loading", true);
