@@ -1,8 +1,10 @@
-package collegeManagement;
+package student;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import collegeManagement.JdbcConnection;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -29,7 +31,7 @@ public class UpdateProfileStudent extends JFrame implements ActionListener{
     ImageIcon icon = null ;
     String rollno = "";
     
-    UpdateProfileStudent(String rollno) {
+    public UpdateProfileStudent(String rollno) {
       this.rollno = rollno;
         
         setSize(900, 700);

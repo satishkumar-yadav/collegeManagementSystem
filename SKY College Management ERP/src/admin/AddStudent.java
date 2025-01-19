@@ -9,6 +9,13 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.toedter.calendar.JDateChooser;
+
+import collegeManagement.Checks;
+import collegeManagement.Credential;
+import collegeManagement.Generator;
+import collegeManagement.JdbcConnection;
+import collegeManagement.Validate;
+
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,7 +44,7 @@ public class AddStudent extends JFrame implements ActionListener{
     long first4 = Math.abs((ran.nextLong() % 9000L) + 1000L);
     long first2 = Math.abs((ran.nextLong() % 90L) + 10L);
     
-    AddStudent() {
+    public AddStudent() {
         
         setSize(900, 700);
         setLocation(250, 20);

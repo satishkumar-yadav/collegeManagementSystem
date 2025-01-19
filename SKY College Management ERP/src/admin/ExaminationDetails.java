@@ -2,6 +2,9 @@ package admin;
 
 import java.awt.*;
 import javax.swing.*;
+
+import collegeManagement.JdbcConnection;
+
 import java.sql.*;
 import net.proteanit.sql.DbUtils;
 import java.awt.event.*;

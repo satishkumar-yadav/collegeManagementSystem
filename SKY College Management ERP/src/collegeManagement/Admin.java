@@ -15,6 +15,17 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import admin.AddStudent;
+import admin.AddTeacher;
+import admin.StudentDetails;
+import admin.StudentLeave;
+import admin.StudentLeaveDetails;
+import admin.TeacherDetails;
+import admin.TeacherLeave;
+import admin.TeacherLeaveDetails;
+import admin.UpdateStudent;
+import admin.UpdateTeacher;
+
    //  Background Image Positioning:
 
      // Use a JLayeredPane or JPanel with a GridBagLayout to avoid layout issues with the image and menu components.

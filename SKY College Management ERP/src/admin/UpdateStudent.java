@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import collegeManagement.JdbcConnection;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -28,7 +30,7 @@ public class UpdateStudent extends JFrame implements ActionListener{
     File selectedFile ;
     ImageIcon icon = null ;
     
-    UpdateStudent() {
+    public UpdateStudent() {
         
         setSize(900, 700);
         setLocation(350, 50);

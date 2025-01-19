@@ -1,6 +1,9 @@
-package collegeManagement;
+package admin;
 
 import javax.swing.*;
+
+import collegeManagement.JdbcConnection;
+
 import java.awt.*;
 import java.sql.*;
 import net.proteanit.sql.DbUtils;
@@ -13,7 +16,7 @@ public class StudentDetails extends JFrame implements ActionListener {
     JTable table;
     JButton search, print, update, add, cancel, reset ;
     
-    StudentDetails() {
+    public StudentDetails() {
         
         getContentPane().setBackground(Color.WHITE);
         setLayout(null);

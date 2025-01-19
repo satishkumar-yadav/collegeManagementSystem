@@ -25,6 +25,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import student.UpdateProfileStudent;
+import student.ViewStudentProfile;
+
 
 
 public class Student extends JFrame implements ActionListener {

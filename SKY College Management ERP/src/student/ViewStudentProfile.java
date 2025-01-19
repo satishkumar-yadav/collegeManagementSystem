@@ -1,8 +1,10 @@
-package collegeManagement;
+package student;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import collegeManagement.JdbcConnection;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -27,7 +29,7 @@ public class ViewStudentProfile extends JFrame {
     ImageIcon icon = null ;
     String rollno = "";
     
-    ViewStudentProfile(String rollno) {
+    public ViewStudentProfile(String rollno) {
         this.rollno = rollno;
         
         setSize(900, 700);

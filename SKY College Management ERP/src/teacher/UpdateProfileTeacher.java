@@ -1,8 +1,10 @@
-package collegeManagement;
+package teacher;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import collegeManagement.JdbcConnection;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -29,7 +31,7 @@ public class UpdateProfileTeacher extends JFrame implements ActionListener{
     ImageIcon icon = null ;
     String empid = "";
     
-    UpdateProfileTeacher(String empId) {
+    public UpdateProfileTeacher(String empId) {
         empid = empId;
         
         setSize(900, 750);

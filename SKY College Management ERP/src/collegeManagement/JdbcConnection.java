@@ -12,7 +12,7 @@ public class JdbcConnection
 	
 	private final String url = "jdbc:mysql://localhost:3306/" + dbName; 
 	private Connection con ;
-	Statement st;
+	public Statement st;
 		
    public JdbcConnection  ()                  
    {

@@ -22,6 +22,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import admin.AddStudent;
+import admin.AddTeacher;
+
 public class Credential extends JFrame implements ActionListener
 {
 	JButton bsubmit, breset, bback ;

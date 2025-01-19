@@ -2,6 +2,9 @@ package admin;
 
 import java.awt.*;
 import javax.swing.*;
+
+import collegeManagement.JdbcConnection;
+
 import java.sql.*;
 import java.awt.event.*;
 

@@ -1,8 +1,10 @@
-package collegeManagement;
+package teacher;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import collegeManagement.JdbcConnection;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -27,7 +29,7 @@ public class ViewTeacherProfile extends JFrame {
     ImageIcon icon = null ;
     String empid = "";
     
-    ViewTeacherProfile(String empId) {
+    public ViewTeacherProfile(String empId) {
          empid = empId;
         
         setSize(900, 700);

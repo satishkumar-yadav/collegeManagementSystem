@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import com.toedter.calendar.JDateChooser;
+
+import collegeManagement.JdbcConnection;
+
 import java.awt.event.*;
 
 public class TeacherLeave extends JFrame implements ActionListener {
@@ -13,7 +16,7 @@ public class TeacherLeave extends JFrame implements ActionListener {
     JDateChooser dcdate;
     JButton submit, cancel, reset;
     
-    TeacherLeave() {
+    public TeacherLeave() {
         
         setSize(500, 550);
         setLocation(550, 100);
