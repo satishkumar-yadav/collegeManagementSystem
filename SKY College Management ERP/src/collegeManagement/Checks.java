@@ -36,21 +36,26 @@ public class Checks
 	        JOptionPane.showMessageDialog(null, "Name and Father's Name Cannot be Same !", "Error", JOptionPane.ERROR_MESSAGE);
 	        return false ;
 	    }
-	    if (!Pattern.matches("\\d{10}", phone)) {
-	        JOptionPane.showMessageDialog(null, "Phone Number Must be 10 Digits and Only Numeric!", "Error", JOptionPane.ERROR_MESSAGE);
-	        return false ;
-	    }
-
-	    // Validate phone number for continuous digits or repeated digits
-	    if (checksInstance.validator.containsContinuousDigit(phone) ) {
-	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More than 3 Continuous Digits !", "Error", JOptionPane.ERROR_MESSAGE);
-	        return false ;
-	    }
-	    if (checksInstance.validator.containsRepeatedDigit(phone)) {
-	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More Than 3 Repeated Digits!", "Error", JOptionPane.ERROR_MESSAGE);
-	        return false ;
-	    }
 	    
+//	    if (!Pattern.matches("\\d{10}", phone)) {
+//	        JOptionPane.showMessageDialog(null, "Phone Number Must be 10 Digits and Only Numeric!", "Error", JOptionPane.ERROR_MESSAGE);
+//	        return false ;
+//	    }
+//
+//	    // Validate phone number for continuous digits or repeated digits
+//	    if (checksInstance.validator.containsContinuousDigit(phone) ) {
+//	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More than 3 Continuous Digits !", "Error", JOptionPane.ERROR_MESSAGE);
+//	        return false ;
+//	    }
+//	    if (checksInstance.validator.containsRepeatedDigit(phone)) {
+//	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More Than 3 Repeated Digits!", "Error", JOptionPane.ERROR_MESSAGE);
+//	        return false ;
+//	    }
+	    
+	    if (checksInstance.validator.validateMobileNumber(phone)) {
+	      //  JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More Than 3 Repeated Digits!", "Error", JOptionPane.ERROR_MESSAGE);
+	        return false ;
+	    }
 	    
 	 // Validate aadhar number for continuous digits or repeated digits
 	    if (checksInstance.validator.containsContinuousDigit(aadhar) ) {

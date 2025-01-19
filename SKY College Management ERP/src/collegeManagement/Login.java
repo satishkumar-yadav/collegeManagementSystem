@@ -26,14 +26,24 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 public class Login extends JFrame implements ActionListener {
 
-	JButton blogin, bcancel, bforget;
+	JButton blogin, bcancel, bforget, bdatabase;
     JTextField tfusername ;
     JPasswordField tfpassword;
     JComboBox jcbrole, jcbrole2;
     PreparedStatement ps;
     JDialog loadingDialog;
+    
+    // File to store the state of the "Database" button
+   // private static final String FLAG_FILE = "projectRunFlag.txt";     // modified to below code to create this in current dir where program is running 
+    private static final String FLAG_FILE = System.getProperty("user.dir") + "/projectRunFlag.txt";
+
 	
 	public Login()
 	{
@@ -212,6 +222,19 @@ public class Login extends JFrame implements ActionListener {
         bforget.addActionListener(this);
         add( bforget);
        
+        bdatabase =new JButton("DataBase");
+        bdatabase.setBounds(190, 420, 140, 40);
+        bdatabase.setBackground(Color.ORANGE);
+        bdatabase.setForeground(Color.BLACK);
+        bdatabase.setFont(new Font("Tahoma", Font.BOLD, 16));
+        bdatabase.addActionListener(this);
+        add( bdatabase);
+     // Check if this is the first time the project is run
+        if (isFirstRun()) {
+            bdatabase.setEnabled(true); // Enable the button on first run
+        } else {
+            bdatabase.setEnabled(false); // Disable the button afterward
+        }
         
         lb7 = new JLabel("Copyright @ BYTE CODERS. All rights reserved. ");
         lb7.setBounds(150, 600, 680, 30);
@@ -250,6 +273,11 @@ public class Login extends JFrame implements ActionListener {
 		{
 			new ForgetPassword();
 			setVisible(false);
+		}
+		else if (ae.getSource() == bdatabase )
+		{
+			new DataBase();
+            disableDatabaseButton(); // Disable the button after it's clicked
 		}
 	}
 	
@@ -423,6 +451,44 @@ public class Login extends JFrame implements ActionListener {
     }
     
     
+    
+    // Method to check if the project is being run for the first time
+    private boolean isFirstRun() {
+        File file = new File(FLAG_FILE);
+
+        // If the file does not exist, this is the first run
+        if (!file.exists()) {
+            try {
+                // Create the file to mark that the project has been run
+                FileWriter writer = new FileWriter(file);
+                writer.write("This project has been run before.");
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        // If the file exists, this is not the first run
+        return false;
+    }
+
+    // Method to disable the "Database" button and persist the state
+    private void disableDatabaseButton() {
+        bdatabase.setEnabled(false);
+
+        try {
+            // Update the flag file to mark that the button has been used
+            FileWriter writer = new FileWriter(FLAG_FILE);
+            writer.write("Database button has been used.");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+ 
+    
+    
     private void showLoadingIndicator() {
         loadingDialog = new JDialog(this, "Loading", true);
         JLabel loadingLabel = new JLabel("Loading, please wait...");
@@ -449,6 +515,52 @@ public class Login extends JFrame implements ActionListener {
 
 
 
+/*
+ 
+1. Flag File (projectRunFlag.txt):
+-A file is used to persist the state of whether the project has been run before.
+-If the file does not exist, the project is considered to be running for the first time.
+
+2.isFirstRun() Method:
+-Checks if the flag file exists.
+-If the file doesn't exist, it creates the file and returns true (first run).
+-If the file exists, it returns false (not the first run).
+
+3.disableDatabaseButton() Method:
+-Disables the "Database" button.
+-Updates the flag file to indicate that the "Database" button has been used.
+
+4.Button State Initialization:
+-During the initialization of the Login class, the isFirstRun() method is called to set the initial state of the "Database" button.
+
+How It Works
+
+1.On the first run, the projectRunFlag.txt file does not exist:
+-The "Database" button is enabled.
+-The file is created to mark the first run.
+
+2.On subsequent runs:
+-The file exists, so the "Database" button is disabled.
+
+3.When the "Database" button is clicked:
+-The button is disabled, and the state is saved to the file.
+
+How to Test
+
+1.Run the application for the first time. The "Database" button should be enabled.
+2.Close and reopen the application. The "Database" button should now be disabled.
+3.Delete the projectRunFlag.txt file and rerun the application to simulate the first run again.
+ 
+ Key Changes
+1.System.getProperty("user.dir"):
+-This retrieves the current working directory of the application.
+-The projectRunFlag.txt file will be created in the same directory where your project resides or where the application is run.
+
+2.File Location:
+-The file will now always be created in the project's root folder (e.g., where the .java or .class files are located).
+
+ 
+ */
 
 
 /*

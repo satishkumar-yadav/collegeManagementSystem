@@ -1,4 +1,4 @@
-package collegeManagement;
+package admin;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

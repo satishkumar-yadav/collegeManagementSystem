@@ -7,6 +7,8 @@ import java.time.Period;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.swing.JOptionPane;
+
 public class Validate {
 
     // Method to validate if age is within the specified range
@@ -45,6 +47,48 @@ public class Validate {
 
     
 
+
+        public boolean validateMobileNumber(String mobileNumber) {
+            // Check if the input is a 10-digit number
+            if (!mobileNumber.matches("\\d{10}")) {
+               // System.out.println("Invalid number. A mobile number must be exactly 10 digits.");
+                JOptionPane.showMessageDialog(null, "Phone Number Must be 10 Digits and Only Numeric!", "Error", JOptionPane.ERROR_MESSAGE);
+              //  return false;
+                return true;
+            }
+
+            // Check if the number starts with 6, 7, 8, or 9
+            if (!mobileNumber.matches("^[6-9].*")) {
+                JOptionPane.showMessageDialog(null, "Invalid number. A mobile number must start with 6, 7, 8, or 9!", "Error", JOptionPane.ERROR_MESSAGE);
+               // return false;
+                return true;
+            }
+
+            // Check if the number contains a reverse sequence of continuous digits
+            String reverseContinuousPattern = "9876543210";
+            if (mobileNumber.contains(reverseContinuousPattern)) {
+                JOptionPane.showMessageDialog(null, "Invalid number. A mobile number cannot contain reverse continuous digits like 9876543210!", "Error", JOptionPane.ERROR_MESSAGE);
+              //  return false;
+                return true;
+            }
+            
+            // Validate phone number for continuous digits or repeated digits
+    	    if (containsContinuousDigit(mobileNumber) ) {
+    	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More than 3 Continuous Digits !", "Error", JOptionPane.ERROR_MESSAGE);
+    	        return true ;
+    	    }
+    	    if (containsRepeatedDigit(mobileNumber)) {
+    	        JOptionPane.showMessageDialog(null, "Phone Number Cannot Contain More Than 3 Repeated Digits!", "Error", JOptionPane.ERROR_MESSAGE);
+    	        return true ;
+    	    }
+
+            // If all checks pass
+          //  System.out.println("Valid mobile number.");
+           // return true;
+            return false;
+        }
+    
+    
     // Method to check if a number contains continuous digits
     public boolean containsContinuousDigits(String number) {
         for (int i = 0; i < number.length() - 1; i++) {
@@ -152,7 +196,18 @@ public class Validate {
 }
 
 
+/*
+ 
+ Regex for Starting Digit Validation:
+"^[6-9].*" ensures the number starts with 6, 7, 8, or 9.
 
+Regex for Length Validation:
+"\\d{10}" ensures the number has exactly 10 digits.
+
+Reverse Continuous Digits Check:
+The pattern "9876543210" is checked using String.contains()
+ 
+ */
 
 
 

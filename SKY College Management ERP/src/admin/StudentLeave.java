@@ -1,4 +1,4 @@
-package collegeManagement;
+package admin;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,46 +6,46 @@ import java.sql.*;
 import com.toedter.calendar.JDateChooser;
 import java.awt.event.*;
 
-public class TeacherLeave extends JFrame implements ActionListener {
+public class StudentLeave extends JFrame implements ActionListener {
 
-    Choice cEmpId, ctime;
-    JTextField tfempid;
+    Choice crollno, ctime;
+    JTextField tfrollno;
     JDateChooser dcdate;
     JButton submit, cancel, reset;
     
-    TeacherLeave() {
+    StudentLeave() {
         
         setSize(500, 550);
         setLocation(550, 100);
         setLayout(null);
-       // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         getContentPane().setBackground(Color.WHITE);
         
-        JLabel heading = new JLabel("Apply Leave (Teacher)");
+        JLabel heading = new JLabel("Apply Leave (Student)");
         heading.setBounds(40, 50, 300, 30);
         heading.setFont(new Font("Tahoma", Font.BOLD, 20));
         add(heading);
         
-        JLabel lblrollno = new JLabel("Search by Employee Id");
+        JLabel lblrollno = new JLabel("Search by Roll Number");
         lblrollno.setBounds(60, 100, 200, 20);
         lblrollno.setFont(new Font("Tahoma", Font.PLAIN, 18));
         add(lblrollno);
         
-        cEmpId = new Choice();
-        cEmpId.setBounds(60, 130, 100, 20);
-        cEmpId.add("Select EmpID");
-        add(cEmpId);
+        crollno = new Choice();
+        crollno.setBounds(60, 130, 100, 20);
+        crollno.add("Select RollNo");
+        add(crollno);
         
-        tfempid = new JTextField();
-        tfempid.setBounds(170, 130, 100, 20);
-        add(tfempid);
+        tfrollno = new JTextField();
+        tfrollno.setBounds(170, 130, 100, 20);
+        add(tfrollno);
         
         try {
         	JdbcConnection c1 = new JdbcConnection();
-            ResultSet rs = c1.st.executeQuery("select * from teacher");
+            ResultSet rs = c1.st.executeQuery("select * from student");
             while(rs.next()) {
-                cEmpId.add(rs.getString("empid"));
+                crollno.add(rs.getString("rollno"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,32 +100,33 @@ public class TeacherLeave extends JFrame implements ActionListener {
     }
     
     public void actionPerformed(ActionEvent ae) {
-        if (ae.getSource() == submit) {
-        	String id1 = tfempid.getText().trim();
-            String id2 = cEmpId.getSelectedItem();
+        if (ae.getSource() == submit)
+         {
+        	String roll1 = tfrollno.getText().trim();
+            String roll2 = crollno.getSelectedItem();
             String date = ((JTextField) dcdate.getDateEditor().getUiComponent()).getText();
             String duration = ctime.getSelectedItem();
-            String empid = " ";
+            String rollno = " ";
             
-            if (!(id1.isBlank()) && id2.equals("Select EmpID"))
+            if (!(roll1.isBlank()) && roll2.equals("Select RollNo"))
         	{
-            	empid = id1;
+        		rollno = roll1;
         	}
-        	else if (id1.isBlank() && !(id2.equals("Select EmpID")))
+        	else if (roll1.isBlank() && !(roll2.equals("Select RollNo")))
         	{
-        		empid = id2;
+        		rollno = roll2;
         	}
-        	else if (!(id1.isBlank()) && !(id2.equals("Select EmpID")))
+        	else if (!(roll1.isBlank()) && !(roll2.equals("Select RollNo")))
         	{
-        		JOptionPane.showMessageDialog(null, "Please Use Any One Field Either Select or Enter Employee ID in TextBox.");
+        		JOptionPane.showMessageDialog(null, "Please Use Any One Field Either Select or Enter Roll No in TextBox.");
         		return;
         	}
         	else{
-        		 JOptionPane.showMessageDialog(null, "Please Select or Enter Employee ID First.");
+        		 JOptionPane.showMessageDialog(null, "Please Select or Enter Roll Number First.");
                  return;
         	}
             
-            String query = "insert into teacherleave values('"+empid+"', '"+date+"', '"+duration+"')";
+            String query = "insert into studentleave values('"+rollno+"', '"+date+"', '"+duration+"')";
             
             try {
             	JdbcConnection c1 = new JdbcConnection();
@@ -138,16 +139,16 @@ public class TeacherLeave extends JFrame implements ActionListener {
         } 
         else if (ae.getSource() == reset)
         {
-        	tfempid.setText(" ");
-        	cEmpId.select(0);
+        	tfrollno.setText(" ");
+        	crollno.select(0);
         	dcdate.setDate(null);
         	ctime.select(0);
         }
-        else
+        else 
         {
             setVisible(false);
         }
     }
 
-  //  public static void main(String[] args) {    new TeacherLeave();   }
+  //  public static void main(String[] args) {    new StudentLeave();   }
 }

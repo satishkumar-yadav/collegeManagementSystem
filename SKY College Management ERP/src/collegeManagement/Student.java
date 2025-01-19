@@ -284,7 +284,7 @@ public class Student extends JFrame implements ActionListener {
        }
        else if (msg.equals("Notes")) {
     	   JOptionPane.showMessageDialog(this, "Showing Notes."); 
-          // new Notice();
+          // new Notes();
        }
    }
 

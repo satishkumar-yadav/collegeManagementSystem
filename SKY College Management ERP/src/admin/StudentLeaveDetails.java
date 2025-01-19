@@ -1,4 +1,4 @@
-package collegeManagement;
+package admin;
 
 import javax.swing.*;
 import java.awt.*;
