@@ -151,7 +151,5 @@ public class EnterMarks extends JFrame implements ActionListener {
         }
     }
 
-    public static void main(String[] args) {
-        new EnterMarks();
-    }
+  //  public static void main(String[] args) {    new EnterMarks();   }
 }

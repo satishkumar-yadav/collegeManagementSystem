@@ -1,4 +1,4 @@
-package admin;
+package temp;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import com.toedter.calendar.JDateChooser;
 
-import collegeManagement.Admin;
 import collegeManagement.Checks;
 import collegeManagement.Generator;
 import collegeManagement.JdbcConnection;
@@ -26,7 +25,7 @@ import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class AddStudent extends JFrame implements ActionListener{
+public class AddNewStudent extends JFrame implements ActionListener{
     
 	private Generator generator = new Generator();
 	PreparedStatement ps;
@@ -45,11 +44,11 @@ public class AddStudent extends JFrame implements ActionListener{
     long first4 = Math.abs((ran.nextLong() % 9000L) + 1000L);
     long first2 = Math.abs((ran.nextLong() % 90L) + 10L);
     
-    public AddStudent() {
+    public AddNewStudent() {
         
         setSize(900, 700);
         setLocation(250, 20);
-       // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
         
         JLabel heading = new JLabel("New Student Details");
@@ -126,7 +125,7 @@ public class AddStudent extends JFrame implements ActionListener{
         tffname.setBounds(610, 150, 180, 30);
         add(tffname);
         
-        JLabel lblrollno = new JLabel("Roll Number         :");
+        JLabel lblrollno = new JLabel("Temp Roll Number:");
         lblrollno.setBounds(50, 200, 200, 30);
         lblrollno.setFont(new Font("serif", Font.BOLD, 20));
         add(lblrollno);
@@ -408,6 +407,13 @@ public class AddStudent extends JFrame implements ActionListener{
         get.setFont(new Font("Tahoma", Font.BOLD, 15));
         add(get);
         
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                redirectToLogin();
+            }
+        });
+        
         setVisible(true);
     }
     
@@ -498,10 +504,11 @@ public class AddStudent extends JFrame implements ActionListener{
                 if (added) {
                 	String type = "course";
                     String role = "Student";
-                	generator.updateCounter(yoa, course , branch, type);
+                	generator.updateTempCounter(yoa, course , branch, type);
                    // JOptionPane.showMessageDialog(this, "Counter Updated ! Roll No: " , "Success", JOptionPane.INFORMATION_MESSAGE);
-                	setDefaultCredential(role,rollno,phone);
-                   // setVisible(false);
+                    new Credential(role, rollno,phone);
+                    setVisible(false);
+                	
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to Add Student. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -540,11 +547,11 @@ public class AddStudent extends JFrame implements ActionListener{
             	{
             		try {
             			String type = "course";
-                        String rollNo = generator.generateID(yoa, course , branch, type);
+                        String rollNo = generator.generateTempID(yoa, course , branch, type);
                         labelrollno.setText(rollNo);
-                        JOptionPane.showMessageDialog(null, "RollNo Generated Successfully! Roll No: " + rollNo);
+                        JOptionPane.showMessageDialog(null, "Temp RollNo Generated Successfully! Temp Roll No: " + rollNo);
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Failed to Generate RollNo. Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Failed to Generate Temp RollNo. Error: " + e.getMessage());
                     }
             		
             	//	labelrollno.setText(rollNo);    // labelrollno.setText("20103"+first2); 
@@ -554,7 +561,7 @@ public class AddStudent extends JFrame implements ActionListener{
 
     	else
         {
-            setVisible(false);
+    		redirectToLogin();
         }
     	
     }
@@ -598,7 +605,7 @@ public class AddStudent extends JFrame implements ActionListener{
             JdbcConnection jdbc = new JdbcConnection();
            // JOptionPane.showMessageDialog(this, "JDBC : "+jdbc);
             
-            String query = "INSERT INTO student (rollno, name, fname, phone, email, aadhar, dob, address, pic, branch, course, qualification, classx, classxii, semester, gender, doa ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+            String query = "INSERT INTO temp_student (rollno, name, fname, phone, email, aadhar, dob, address, pic, branch, course, qualification, classx, classxii, semester, gender, doa ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
             ps = jdbc.prepareStatement(query);
             ps.setString(1, rollno);
             ps.setString(2, name);
@@ -624,11 +631,11 @@ public class AddStudent extends JFrame implements ActionListener{
             
             int flag = ps.executeUpdate();
             if (flag > 0) {
-                JOptionPane.showMessageDialog(this, "Student Details Added Successfully! ");
+                JOptionPane.showMessageDialog(this, "Student Registered Successfully. ");
                // return true;
                 // setVisible(false);
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to Add Student Details.");
+                JOptionPane.showMessageDialog(this, "Failed to Register Student !");
               //  return false;
             }
             
@@ -640,233 +647,12 @@ public class AddStudent extends JFrame implements ActionListener{
         return false;
     }
     
-    private void setDefaultCredential(String role, String roll, String phone) {
-		
-	    String Id = roll;
-	    String userName = Id;
-		String passWord = phone;
-		String Role = role;
-	 
-	 try {
-         JdbcConnection dfcon = new JdbcConnection();
-         //JOptionPane.showMessageDialog(this, "  Connection Successful !! ");
-         String dquery = null;
-         if ("student".equalsIgnoreCase(Role)) 
-         {
-       	  dquery = "insert into login ( role, username, password, id) values ( ?, ?, ?, (SELECT rollno FROM student WHERE rollno = ?) ) ";
-         } else if ("teacher".equalsIgnoreCase(Role)) 
-         {
-       	  dquery = "insert into login ( role, username, password, id) values ( ?, ?, ?, (SELECT empid FROM teacher WHERE empid = ?) ) ";
-         }
-         else if ("faculty".equalsIgnoreCase(Role)) 
-         {
-       	  dquery = "insert into login ( role, username, password, id) values ( ?, ?, ?, (SELECT empid FROM faculty WHERE empid = ?) ) ";
-         }
-         
-         PreparedStatement dps = dfcon.prepareStatement(dquery);
-         dps.setString(1, Role);
-         dps.setString(2, userName);
-         dps.setString(3, passWord);
-         dps.setString(4, Id);
-         // JOptionPane.showMessageDialog(this, "Executing Query : "+queryupdate);   
-         
-         int dflag = dps.executeUpdate();
-	     // ps.close();
-       
-	      if( dflag == 1 )
-			{
-	    	 // JOptionPane.showMessageDialog(this, "Default Credential Created.");
-	    	  redirectToAdmin();
-	    	  
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(this, "Default Credential Creation Failed !");
-				return;
-			}
-     } 
-   catch (Exception e) 
-   {   
-       JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-   }
-	 
-}
     
-    private void redirectToAdmin() {
+    private void redirectToLogin() {
         setVisible(false); 
-        new Admin(); 
+        new Login(); 
     }
     
- //   public static void main(String[] args) {   new AddStudent();  }
+  //  public static void main(String[] args) {   new AddNewStudent();  }
 }    
     
-
-
-
-
-
-
-
-
-
-
-    
-//    private void validateCheck(String name,String fname,String phone,String aadhar,String email,String x,String xii,String gender,String address,String dob,String course,String branch,String qualification,File selectedFile, String semester ) 
-//    {
-//        if (name.isBlank() || gender.isEmpty() || aadhar.isBlank() || address.isBlank() || fname.isBlank() || dob.isBlank() || phone.isBlank() || "Select Semester".equals(semester) || "Select Course".equals(course) || "Select Branch".equals(branch) || "Select Qualification".equals(qualification) || x.isBlank() || selectedFile == null ) {
-//            JOptionPane.showMessageDialog(this, "All * Marked Fields are Mandatory!, Including Profile Picture.");
-//            return;
-//        }
-//                           
-//         if (!Pattern.matches("[a-z A-Z]{2,}", name)) {
-//              JOptionPane.showMessageDialog(this, "Please Enter Valid Name. It Must be Alphabet Only !", "Error", JOptionPane.ERROR_MESSAGE);
-//               return;
-//          }
-//         
-//         if (!Pattern.matches("[a-z A-Z]{2,}", fname)) {
-//             JOptionPane.showMessageDialog(this, "Please Enter Valid Father's Name. It Must be Alphabet Only !", "Error", JOptionPane.ERROR_MESSAGE);
-//              return;
-//         }
-//
-//        if (!Pattern.matches("\\d{10}", phone)) {
-//            JOptionPane.showMessageDialog(this, "Phonse Number Must be 10 Digits and Only Numeric !", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//        
-//     // Validate phone number for continuous digits or repeated digits
-//        if (containsContinuousDigits(phone,aadhar) || containsRepeatedDigits(phone) || containsRepeatedAadhar(aadhar) ) {
-//            JOptionPane.showMessageDialog(this, "Phone Number And Aadhar Number Cannot Contain Continuous Digits or More Than 3 Repeated Digits!", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//
-//        if (!Pattern.matches("\\d{12}", aadhar)) {
-//            JOptionPane.showMessageDialog(this, "Aadhar Number Must be 12 Digits Numeric Only !", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//
-//        if (!Pattern.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", email)) {
-//            JOptionPane.showMessageDialog(this, "Please Enter a Valid Email Address.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//        
-//        try {
-//        	
-//        	// Validate age is between 18 and 40
-//            int age = calculateAge(dob);
-//            if (age < 18 || age > 40) {
-//                JOptionPane.showMessageDialog(this, "Age Must Be Between 18 and 40 Years.", "Error", JOptionPane.ERROR_MESSAGE);
-//                return;
-//            }
-//        	
-//            double percentageX = Double.parseDouble(x);
-//            if (percentageX < 35 || percentageX > 100 ) 
-//        	{
-//                JOptionPane.showMessageDialog(this, "Class X Percentages Must be Between 35 and 100.", "Error", JOptionPane.ERROR_MESSAGE);
-//                return;
-//            }
-//            
-//            if (tfxii.isEnabled()) 
-//            { 
-//            	double percentageXII = Double.parseDouble(xii); 
-//            	 if ( percentageXII < 35 || percentageXII > 100) 
-//            	 {
-//                     JOptionPane.showMessageDialog(this, "Class XII Percentages Must be Between 35 and 100.", "Error", JOptionPane.ERROR_MESSAGE);
-//                     return;
-//                 }
-//            }
-//                
-//        } catch (NumberFormatException | ParseException e) {
-//            JOptionPane.showMessageDialog(this, "Class X and XII Percentages Must be Numeric.", "Error", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//    }
-    
-     
-    
- // Helper method to calculate age
-//    private int calculateAge(String dob) throws ParseException {
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//        Date birthDate = dateFormat.parse(dob);
-//        Calendar birthCalendar = Calendar.getInstance();
-//        birthCalendar.setTime(birthDate);
-//
-//        Calendar today = Calendar.getInstance();
-//        int age = today.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR);
-//
-//        if (today.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
-//            age--; // Adjust if birthday hasn't occurred yet this year
-//        }
-//
-//        return age;
-//    }
-
-    // Helper method to check for continuous digits in the phone number
-//    private boolean containsContinuousDigits(String phone, String aadhar) {
-//        for (int i = 0; i < phone.length() - 3; i++) {
-//            if ( ( phone.charAt(i) + 1 == phone.charAt(i + 1) &&
-//                   phone.charAt(i + 1) + 1 == phone.charAt(i + 2) &&
-//                   phone.charAt(i + 2) + 1 == phone.charAt(i + 3) ) || 
-//            		( aadhar.charAt(i) + 1 == aadhar.charAt(i + 1) &&
-//            		  aadhar.charAt(i + 1) + 1 == aadhar.charAt(i + 2) &&
-//            		  aadhar.charAt(i + 2) + 1 == aadhar.charAt(i + 3) ) ) 
-//                {
-//                return true; // Found 4 continuous digits
-//                }
-//        }
-//        return false;
-//    }
-
-    // Helper method to check for repeated digits in the phone number
-//    private boolean containsRepeatedDigits(String phone) {
-//        for (int i = 0; i < phone.length() - 3; i++) {
-//            if (phone.charAt(i) == phone.charAt(i + 1) &&
-//                phone.charAt(i + 1) == phone.charAt(i + 2) &&
-//                phone.charAt(i + 2) == phone.charAt(i + 3)) {
-//                return true; // Found 4 repeated digits
-//            }
-//        }
-//        return false;
-//    }
-//    
-//    private boolean containsRepeatedAadhar(String aadhar) {
-//        for (int i = 0; i < aadhar.length() - 3; i++) {
-//            if (aadhar.charAt(i) == aadhar.charAt(i + 1) &&
-//            	aadhar.charAt(i + 1) == aadhar.charAt(i + 2) &&
-//            	aadhar.charAt(i + 2) == aadhar.charAt(i + 3)) {
-//                return true; // Found 4 repeated digits
-//            }
-//        }
-//        return false;
-//    }
-    
-
-/*
-
-File Upload:
-
-  Validate the file format and size before allowing submission.
-  Ensure selectedFile is not null and implement exception handling for FileInputStream.
-
-UI Enhancements:
-
-   Provide placeholder text or tooltips for fields like phone, email, etc., to guide the user.
-   Ensure better layout alignment for a clean UI appearance.
-   
-   help modularizing this code or enhancing a specific functionality?
-
-*/
-
-
-//upload.addActionListener(e -> {
-//JFileChooser fileChooser = new JFileChooser();
-//fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
-//int result = fileChooser.showOpenDialog(this);
-//if (result == JFileChooser.APPROVE_OPTION) {
-//  selectedFile = fileChooser.getSelectedFile();
-//  ImageIcon icon = new ImageIcon(new ImageIcon(selectedFile.getAbsolutePath()).getImage().getScaledInstance(140, 130, Image.SCALE_SMOOTH));
-//  picLabel.setIcon(icon);
-//}
-//});
-
-
-

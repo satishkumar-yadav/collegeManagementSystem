@@ -4,11 +4,13 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import collegeManagement.Admin;
 import collegeManagement.JdbcConnection;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,14 +23,16 @@ public class UpdateStudent extends JFrame implements ActionListener{
   //  SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy"); // Adjust the format as needed
 	SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
-    JTextField tfaddress, tfphone, tfemail, tfbranch, tfsemester, tfroll;
-    JLabel labelrollno, picLabel, labelname, labelfname, labelx, labelxii, labelaadhar, labelcourse, labelgender, labelqualification, labeldob, labeldoa ;
+    JTextField tfaddress, tfphone, tfemail,  tfroll , tfname, tffname, tfx, tfxii ;
+    JLabel labelrollno, picLabel,  labelaadhar, labelcourse, labelgender,  labeldob, labeldoa ;
     JButton update, cancel, change, search;
     Choice crollno;
+    JComboBox jcbranch, jcsemester, jcqualification;
     FileInputStream fis;
     InputStream is;
     File selectedFile ;
     ImageIcon icon = null ;
+    String course;
     
     public UpdateStudent() {
         
@@ -92,20 +96,20 @@ public class UpdateStudent extends JFrame implements ActionListener{
         lblname.setFont(new Font("serif", Font.BOLD, 20));
         add(lblname);
         
-        labelname = new JLabel();
-        labelname.setBounds(200, 150, 150, 30);
-        labelname.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        add(labelname);
+        tfname = new JTextField();
+        tfname.setBounds(200, 150, 150, 30);
+       // tfname.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        add(tfname);
         
         JLabel lblfname = new JLabel("Father's Name");
         lblfname.setBounds(400, 150, 200, 30);
         lblfname.setFont(new Font("serif", Font.BOLD, 20));
         add(lblfname);
-        
-        labelfname = new JLabel();
-        labelfname.setBounds(600, 150, 150, 30);
-        labelfname.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        add(labelfname);
+       
+        tffname = new JTextField();
+        tffname.setBounds(600, 150, 150, 30);
+        //tffname.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        add(tffname);
         
         JLabel lblrollno = new JLabel("Roll Number");
         lblrollno.setBounds(50, 200, 200, 30);
@@ -159,20 +163,20 @@ public class UpdateStudent extends JFrame implements ActionListener{
         lblx.setFont(new Font("serif", Font.BOLD, 20));
         add(lblx);
         
-        labelx = new JLabel();
-        labelx.setBounds(600, 300, 150, 30);
-        labelx.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        add(labelx);
+        tfx = new JTextField();
+        tfx.setBounds(600, 300, 150, 30);
+        tfx.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        add(tfx);
         
         JLabel lblxii = new JLabel("Class XII (%)");
         lblxii.setBounds(50, 350, 200, 30);
         lblxii.setFont(new Font("serif", Font.BOLD, 20));
         add(lblxii);
         
-        labelxii = new JLabel();
-        labelxii.setBounds(200, 350, 150, 30);
-        labelxii.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        add(labelxii);
+        tfxii = new JTextField();
+        tfxii.setBounds(200, 350, 150, 30);
+        tfxii.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        add(tfxii);
         
         JLabel lblaadhar = new JLabel("Aadhar Number");
         lblaadhar.setBounds(400, 350, 200, 30);
@@ -199,18 +203,26 @@ public class UpdateStudent extends JFrame implements ActionListener{
         lblbranch.setFont(new Font("serif", Font.BOLD, 20));
         add(lblbranch);
         
-        tfbranch = new JTextField();
-        tfbranch.setBounds(600, 400, 150, 30);
-        add(tfbranch);
+        jcbranch = new JComboBox(new String[]{"Select Branch"});
+        jcbranch.setBounds(600, 400, 150, 30);
+        add(jcbranch);
+       
+     //   PropertyChangeListener selectedCourse;
+	//	labelcourse.addPropertyChangeListener(getName(), selectedCourse);
+        
+	//	String pr = (String) selectedCourse ;
+      // JOptionPane.showMessageDialog(null, "Course : "+course);
+       
         
         JLabel lblsemester = new JLabel("Semester");
         lblsemester.setBounds(50, 450, 200, 30);
         lblsemester.setFont(new Font("serif", Font.BOLD, 20));
         add(lblsemester);
         
-        tfsemester = new JTextField();
-        tfsemester.setBounds(200, 450, 150, 30);
-        add(tfsemester);
+        String semester[] = {"Select Semester", "1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester", "7th Semester", "8th Semester"};
+        jcsemester = new JComboBox(semester);
+        jcsemester.setBounds(200, 450, 150, 30);
+        add(jcsemester);
         
         JLabel lblgender = new JLabel("Gender");
         lblgender.setBounds(400, 450, 200, 30);
@@ -227,11 +239,12 @@ public class UpdateStudent extends JFrame implements ActionListener{
         lblqualification.setFont(new Font("serif", Font.BOLD, 20));
         add(lblqualification);
         
-        labelqualification = new JLabel();
-        labelqualification.setBounds(200, 500, 150, 30);
-        labelqualification.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        add(labelqualification);
-        
+        String qualification[] = {"Select Qualification", "10th or Matriculation Equivalent", "12th or Intermediate Equivalent"};
+        jcqualification = new JComboBox(qualification);
+        jcqualification.setBounds(200, 500, 150, 30);
+       // jcqualification.setFont(new Font("serif", Font.BOLD, 20));
+        add(jcqualification);
+                        
         JLabel lbldoa = new JLabel("Date of Admission");
         lbldoa.setBounds(400, 500, 200, 30);
         lbldoa.setFont(new Font("serif", Font.BOLD, 20));
@@ -314,20 +327,25 @@ public class UpdateStudent extends JFrame implements ActionListener{
                     String query2 = "select * from student where rollno='"+crollno.getSelectedItem()+"'";
                     ResultSet rs2 = c2.st.executeQuery(query2);
                     while(rs2.next()) {
-                    	labelname.setText(rs2.getString("name"));
-                        labelfname.setText(rs2.getString("fname"));
+                    	course = rs2.getString("course");
+                    	//JOptionPane.showMessageDialog(null, "Course : "+course);
+                    	selectBranch();
+                    	
+                    	tfname.setText(rs2.getString("name"));
+                        tffname.setText(rs2.getString("fname"));
                         tfaddress.setText(rs2.getString("address"));
                         tfphone.setText(rs2.getString("phone"));
                         tfemail.setText(rs2.getString("email"));
-                        labelx.setText(rs2.getString("classx"));
-                        labelxii.setText(rs2.getString("classxii"));
                         labelaadhar.setText(rs2.getString("aadhar"));
                         labelrollno.setText(rs2.getString("rollno"));
                         labelcourse.setText(rs2.getString("course"));
-                        tfbranch.setText(rs2.getString("branch"));
-                        tfsemester.setText(rs2.getString("semester"));
                         labelgender.setText(rs2.getString("gender"));
-                        labelqualification.setText(rs2.getString("qualification"));
+                        jcqualification.setSelectedItem(rs2.getString("qualification"));
+                        jcbranch.setSelectedItem(rs2.getString("branch"));
+                        jcsemester.setSelectedItem(rs2.getString("semester"));
+                        
+                        tfx.setText(rs2.getString("classx"));
+                        tfxii.setText(rs2.getString("classxii"));
                         
                         Blob b = rs2.getBlob("pic");
                         is = b.getBinaryStream();
@@ -427,20 +445,24 @@ public class UpdateStudent extends JFrame implements ActionListener{
                  String query3 = "select * from student where rollno='"+tfroll.getText().trim()+"'";
                  ResultSet rs3 = c3.st.executeQuery(query3);
                  while(rs3.next()) {
-                 	labelname.setText(rs3.getString("name"));
-                     labelfname.setText(rs3.getString("fname"));
+                	 course = rs3.getString("course");
+                 	//JOptionPane.showMessageDialog(null, "Course : "+course);
+                 	selectBranch();
+                	 
+                 	 tfname.setText(rs3.getString("name"));
+                     tffname.setText(rs3.getString("fname"));
                      tfaddress.setText(rs3.getString("address"));
                      tfphone.setText(rs3.getString("phone"));
                      tfemail.setText(rs3.getString("email"));
-                     labelx.setText(rs3.getString("classx"));
-                     labelxii.setText(rs3.getString("classxii"));
                      labelaadhar.setText(rs3.getString("aadhar"));
                      labelrollno.setText(rs3.getString("rollno"));
                      labelcourse.setText(rs3.getString("course"));
-                     tfbranch.setText(rs3.getString("branch"));
-                     tfsemester.setText(rs3.getString("semester"));
                      labelgender.setText(rs3.getString("gender"));
-                     labelqualification.setText(rs3.getString("qualification"));
+                     jcqualification.setSelectedItem(rs3.getString("qualification"));
+                     jcbranch.setSelectedItem(rs3.getString("branch"));
+                     jcsemester.setSelectedItem(rs3.getString("semester"));
+                     tfx.setText(rs3.getString("classx"));
+                     tfxii.setText(rs3.getString("classxii"));
                      
                      Blob b = rs3.getBlob("pic");
                      is = b.getBinaryStream();
@@ -493,12 +515,16 @@ public class UpdateStudent extends JFrame implements ActionListener{
     	else if (ae.getSource() == update) {
        
             String rollno = labelrollno.getText();
-            String address = tfaddress.getText();
-            String phone = tfphone.getText();
-            String email = tfemail.getText();
-            String branch = tfbranch.getText();
-            String semester = tfsemester.getText();
-           
+            String address = tfaddress.getText().trim();
+            String phone = tfphone.getText().trim();
+            String email = tfemail.getText().trim();
+            String branch = (String) jcbranch.getSelectedItem();
+            String semester = (String) jcsemester.getSelectedItem();
+            String qualification = (String) jcqualification.getSelectedItem();
+            String name = tfname.getText().trim();
+            String fname = tffname.getText().trim();
+            String x =  tfx.getText().trim();
+            String xii =  tfxii.getText().trim();
             
             int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to update the student details?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
@@ -509,7 +535,7 @@ public class UpdateStudent extends JFrame implements ActionListener{
             	 //	fis = new FileInputStream(selectedFile);
             	
               //  String query = "update student set address='"+address+"', phone='"+phone+"', email='"+email+"', branch='"+branch+"' , semester= '"+semester+"' where rollno='"+rollno+"'";  
-                String query = "UPDATE student SET address = ?, phone = ?, email = ?, branch = ?, semester= ?, pic = ? WHERE rollno = ?";
+                String query = "UPDATE student SET name = ?, fname = ?, qualification =?, address = ?, phone = ?, email = ?, branch = ?, semester= ?, pic = ?, classx = ?, classxii = ? WHERE rollno = ?";
                 
              // Check if there's an icon in picLabel
               //  if (picLabel.getIcon() != null) {
@@ -534,13 +560,19 @@ public class UpdateStudent extends JFrame implements ActionListener{
             //    }    
                 
                 PreparedStatement pstmt = con.prepareStatement(query);
-                pstmt.setString(1, address);
-                pstmt.setString(2, phone);
-                pstmt.setString(3, email);
-                pstmt.setString(4, branch);
-                pstmt.setString(5, semester);
-                pstmt.setString(7, rollno);
-                pstmt.setBytes(6, imageBytes);
+                pstmt.setString(1, name);
+                pstmt.setString(2, fname);
+                pstmt.setString(3, qualification);
+                pstmt.setString(4, address);
+                pstmt.setString(5, phone);
+                pstmt.setString(6, email);
+                pstmt.setString(7, branch);
+                pstmt.setString(8, semester);
+                pstmt.setBytes(9, imageBytes);
+                pstmt.setString(10, x);
+                pstmt.setString(11, xii);
+                pstmt.setString(12, rollno);
+                
                 //     ps.setBinaryStream(9, fis, (int) selectedFile.length());
                 
             //    con.st.executeUpdate(query);
@@ -566,7 +598,43 @@ public class UpdateStudent extends JFrame implements ActionListener{
         }
     }
     
- //   public static void main(String[] args) {      new UpdateStudent();   }
+    
+    private void selectBranch() {
+    	
+    	if ( !(course.isBlank()) )
+        {
+    		 String branch1[] = {"Select Branch", "Computer Science", "ECE", "EEE", "Mechanical", "Civil", "IT"};
+    	     String branch2[] = {"Select Branch", "BBA"};
+    	     String branch3[] = {"Select Branch", "Computer Science", "IT"};
+    	     String branch4[] = {"Select Branch", "Computer Science", "IT", "Science" };
+    	     String branch5[] = {"Select Branch", "Economics", "Psychology", "Political Science", "Philosophy", "History", "Literature"};
+    		
+            jcbranch.removeAllItems(); // Clear previous items
+
+            if ("B-Tech".equals(course) || "Diploma".equals(course)) {
+                for (String branch : branch1) jcbranch.addItem(branch);
+                
+            } else if ("BBA".equals(course)) {
+                for (String branch : branch2) jcbranch.addItem(branch);
+                
+            } else if ("BCA".equals(course)) {
+                for (String branch : branch3) jcbranch.addItem(branch);
+                
+            } else if ("Bsc".equals(course)) {
+                for (String branch : branch4) jcbranch.addItem(branch);
+                
+            } else if ("BA".equals(course)) {
+                for (String branch : branch5) jcbranch.addItem(branch);
+                
+            } else {
+            	jcbranch.addItem("Select Branch");
+                
+            }       
+            
+        }
+    }
+    
+   // public static void main(String[] args) {      new UpdateStudent();   }
 }
 
 

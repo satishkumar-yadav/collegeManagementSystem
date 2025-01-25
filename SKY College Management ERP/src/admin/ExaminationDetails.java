@@ -76,13 +76,11 @@ public class ExaminationDetails extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == submit) {
             setVisible(false);    
-            new Marks(search.getText());
+         //   new Marks(search.getText());
         } else {
             setVisible(false);
         }
     }
 
-    public static void main(String[] args) {
-        new ExaminationDetails();
-    }
+  //  public static void main(String[] args) {     new ExaminationDetails();   }
 }

@@ -25,6 +25,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
+import student.StudentsLeave;
+import student.StudentsLeaveDetails;
 import student.UpdateProfileStudent;
 import student.ViewStudentProfile;
 
@@ -32,20 +34,23 @@ import student.ViewStudentProfile;
 
 public class Student extends JFrame implements ActionListener {
 
-	String rollno = "2501 0100";
+	String rollno = "";
+	String role = "";
 	JLabel picLabel, labelname;
 	FileInputStream fis;
     InputStream is;
     File selectedFile ;
     ImageIcon icon = null ;
 	
-	Student(String rollno) {
+	Student(String role, String rollno) {
+	   
+	   this.role = role;
 	   this.rollno = rollno;
 		
    	   setSize(1200, 700);
    	
        setTitle("Student");
-     //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
               
        picLabel = new JLabel("      No Picture Available  ");
@@ -96,6 +101,11 @@ public class Student extends JFrame implements ActionListener {
        profileUpdate.setBackground(Color.WHITE);
        profileUpdate.addActionListener(this);
        profile.add(profileUpdate);
+       
+       JMenuItem credentialUpdate = new JMenuItem("Update Credential");
+       credentialUpdate.setBackground(Color.WHITE);
+       credentialUpdate.addActionListener(this);
+       profile.add(credentialUpdate);
        
        // Leave Details
        JMenu leaveDetails = new JMenu("Leave");
@@ -250,11 +260,11 @@ public class Student extends JFrame implements ActionListener {
     	 //  JOptionPane.showMessageDialog(this, "Updating Student Profile."); 
            new UpdateProfileStudent(rollno);
        }  else if (msg.equals("Apply Leave")) {
-    	   JOptionPane.showMessageDialog(this, "Applying for Leave."); 
-          // new ApplyLeaveStudent(rollno);
+    	  // JOptionPane.showMessageDialog(this, "Applying for Leave."); 
+           new StudentsLeave(rollno);
        }  else if (msg.equals("Applied Leave Details")) {
-    	   JOptionPane.showMessageDialog(this, "Applied Leave Details : "); 
-          // new AppliedLeaveStudent(rollno);
+    	  // JOptionPane.showMessageDialog(this, "Applied Leave Details : "); 
+           new StudentsLeaveDetails(rollno);
        } else if (msg.equals("Examination Results")) {
     	   JOptionPane.showMessageDialog(this, "Showing Examination Results."); 
           // new ExaminationResult(rollno);
@@ -288,6 +298,10 @@ public class Student extends JFrame implements ActionListener {
        else if (msg.equals("Notes")) {
     	   JOptionPane.showMessageDialog(this, "Showing Notes."); 
           // new Notes();
+       }
+       else if (msg.equals("Update Credential")) {
+    	   new UpdateCredential(role, rollno);
+    	   setVisible(false);
        }
    }
 

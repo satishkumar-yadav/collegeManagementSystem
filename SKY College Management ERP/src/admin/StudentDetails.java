@@ -14,7 +14,7 @@ public class StudentDetails extends JFrame implements ActionListener {
     Choice crollno;
     JTextField tfrollno;
     JTable table;
-    JButton search, print, update, add, cancel, reset ;
+    JButton search, print, update, add, cancel, reset, viewAll ;
     
     public StudentDetails() {
         
@@ -46,15 +46,6 @@ public class StudentDetails extends JFrame implements ActionListener {
         }
         
         table = new JTable();
-        /*
-        try {          // auto populate
-        	JdbcConnection c1 = new JdbcConnection();
-            ResultSet rs = c1.st.executeQuery("select * from student");
-            table.setModel(DbUtils.resultSetToTableModel(rs));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        */
         
         JScrollPane jsp = new JScrollPane(table);
         jsp.setBounds(0, 100, 900, 600);
@@ -89,6 +80,11 @@ public class StudentDetails extends JFrame implements ActionListener {
         reset.setBounds(520, 70, 80, 20);
         reset.addActionListener(this);
         add(reset);
+        
+        viewAll = new JButton("ViewAll");
+        viewAll.setBounds(620, 70, 80, 20);
+        viewAll.addActionListener(this);
+        add(viewAll);
         
         setSize(900, 700);
         setLocation(300, 100);
@@ -147,14 +143,31 @@ public class StudentDetails extends JFrame implements ActionListener {
         } else if (ae.getSource() == reset) {
             tfrollno.setText(" ");
             crollno.select(0);
-        } else {
+        }
+        else if (ae.getSource() == viewAll) {
+            tfrollno.setText(" ");
+            crollno.select(0);
+            autoPopulate();
+        }
+        else {
             setVisible(false);
         }
     }
 
     
     
-  //  public static void main(String[] args) {     new StudentDetails();    }
+    private void autoPopulate() {
+		
+    	 try {          
+         	JdbcConnection c1 = new JdbcConnection();
+             ResultSet rs = c1.st.executeQuery("select * from student");
+             table.setModel(DbUtils.resultSetToTableModel(rs));
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+	}
+
+//	public static void main(String[] args) {     new StudentDetails();    }
     
 }
 

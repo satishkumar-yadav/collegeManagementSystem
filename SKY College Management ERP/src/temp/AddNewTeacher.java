@@ -1,4 +1,4 @@
-package admin;
+package temp;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -13,6 +13,7 @@ import com.toedter.calendar.JDateChooser;
 import collegeManagement.Checks;
 import collegeManagement.Generator;
 import collegeManagement.JdbcConnection;
+import collegeManagement.Login;
 import collegeManagement.Validate;
 
 import java.awt.event.*;
@@ -24,7 +25,7 @@ import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class AddTeacher extends JFrame implements ActionListener{
+public class AddNewTeacher extends JFrame implements ActionListener{
     
 	private Generator generator = new Generator();
 	PreparedStatement ps;
@@ -43,11 +44,11 @@ public class AddTeacher extends JFrame implements ActionListener{
     long first4 = Math.abs((ran.nextLong() % 9000L) + 1000L);
     long first2 = Math.abs((ran.nextLong() % 90L) + 10L);
     
-    public AddTeacher() {
+    public AddNewTeacher() {
         
         setSize(900, 700);
         setLocation(250, 20);
-      //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
         
         JLabel heading = new JLabel("New Teacher Details");
@@ -138,7 +139,7 @@ public class AddTeacher extends JFrame implements ActionListener{
         tffname.setBounds(610, 100, 180, 30);
         add(tffname);
         
-        JLabel lblempId = new JLabel("Employee ID         :");
+        JLabel lblempId = new JLabel("Temp Employee ID:");
         lblempId.setBounds(50, 200, 200, 30);
         lblempId.setFont(new Font("serif", Font.BOLD, 20));
         add(lblempId);
@@ -485,6 +486,13 @@ public class AddTeacher extends JFrame implements ActionListener{
         get.setFont(new Font("Tahoma", Font.BOLD, 15));
         add(get);
         
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                redirectToLogin();
+            }
+        });
+        
         setVisible(true);
     }
     
@@ -537,13 +545,9 @@ public class AddTeacher extends JFrame implements ActionListener{
             {
             	role = "Jr.";
             }
-           
-         //   JOptionPane.showMessageDialog(this, "Designation > "+designation+" , Role > "+role);
-           
-            String dob = "";
-            String doj = "";
-            String yoj = "";                    
+            
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String dob = "";
             try {
                 dob = dateFormat.format(dcdob.getDate());
             } catch (Exception e) {
@@ -551,7 +555,8 @@ public class AddTeacher extends JFrame implements ActionListener{
                 return;
             }
             
-           
+            String doj = "";
+            String yoj = "";
             try {
             	doj = dateFormat.format(dcdoj.getDate());
             	SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
@@ -620,6 +625,7 @@ public class AddTeacher extends JFrame implements ActionListener{
              {
              	role = "Jr.";
              }
+             
     		 String yoj = "";
              try {          	
              	     // Extract only the year from the date
@@ -644,9 +650,9 @@ public class AddTeacher extends JFrame implements ActionListener{
         	    	    try 
         	    	      {
         	    	    	String type = "department";
-        	                 String empID = generator.generateID(yoj, department, role, type );
+        	                 String empID = generator.generateTempID(yoj, department, role, type );
         	                 labelempId.setText(empID);  
-        	                 JOptionPane.showMessageDialog(null, "Teacher added successfully! Employee ID: " + empID);
+        	                 JOptionPane.showMessageDialog(null, "Temp ID generated successfully! Temp ID: " + empID);
         	              } catch (Exception e) 
         	    	      {
         	                 JOptionPane.showMessageDialog(null, "Failed to add teacher. Error: " + e.getMessage());
@@ -658,7 +664,7 @@ public class AddTeacher extends JFrame implements ActionListener{
     	}
     	else
         {
-            setVisible(false);
+    		redirectToLogin();
         }
     }
     
@@ -698,7 +704,7 @@ public class AddTeacher extends JFrame implements ActionListener{
          JdbcConnection jdbc = new JdbcConnection();
         // JOptionPane.showMessageDialog(this, "JDBC : "+jdbc);
          
-         String query = "INSERT INTO teacher (empid, name, fname, phone, email, aadhar, dob, address, pic, department, designation, qualification, classx, classxii, grad, pg, phd, gender, isphd, doj ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+         String query = "INSERT INTO temp_teacher (empid, name, fname, phone, email, aadhar, dob, address, pic, department, designation, qualification, classx, classxii, grad, pg, phd, gender, isphd, doj ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
          ps = jdbc.prepareStatement(query);
          ps.setString(1, empid);
          ps.setString(2, name);
@@ -726,10 +732,10 @@ public class AddTeacher extends JFrame implements ActionListener{
          
          int flag = ps.executeUpdate();
          if (flag > 0) {
-             JOptionPane.showMessageDialog(this, "Teacher Details Inserted Successfully!");
+             JOptionPane.showMessageDialog(this, "Teacher Registered Successfully.");
              //setVisible(false);
          } else {
-             JOptionPane.showMessageDialog(this, "Failed to Insert Teacher Details.");
+             JOptionPane.showMessageDialog(this, "Failed to Register Teacher !");
          }
          
          return flag>0;
@@ -740,73 +746,11 @@ public class AddTeacher extends JFrame implements ActionListener{
     }
     
     
+    private void redirectToLogin() {
+        setVisible(false); 
+        new Login(); 
+    }
+    
   //  public static void main(String[] args) {   new AddTeacher();  }
 }
 
-
-
-
-
-/*
- 
- 
- private void validationCheck(String name, String fname, String phone, String aadhar, String email, String x, String xii,String gender,String address,String dob,String department,String subject,String qualification,File selectedFile, String isPhd) {
-    	
-    	if (name.isBlank() || gender.isEmpty() || aadhar.isBlank() || address.isBlank() || fname.isBlank() || dob.isBlank() || phone.isBlank() || "Select Department".equals(department) || "Select Subject".equals(subject) || "Select Qualification".equals(qualification) || x.isBlank() || selectedFile == null || isPhd.isEmpty() ) {
-            JOptionPane.showMessageDialog(this, "All * Marked Fields are Mandatory!, Including Profile Picture.");
-            return;
-        }
-    	
-         if (!Pattern.matches("[a-z A-Z]{2,}", name)) {
-              JOptionPane.showMessageDialog(this, "Please Enter Valid Name. It Must be Alphabet Only !", "Error", JOptionPane.ERROR_MESSAGE);
-               return;
-          }
-         
-         if (!Pattern.matches("[a-z A-Z]{2,}", fname)) {
-             JOptionPane.showMessageDialog(this, "Please Enter Valid Father's Name. It Must be Alphabet Only !", "Error", JOptionPane.ERROR_MESSAGE);
-              return;
-         }
-
-        if (!Pattern.matches("\\d{10}", phone)) {
-            JOptionPane.showMessageDialog(this, "Phone Number Must be 10 Digits and Only Numeric !", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (!Pattern.matches("\\d{12}", aadhar)) {
-            JOptionPane.showMessageDialog(this, "Aadhar Number Must be 12 Digits Numeric Only !", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (!Pattern.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", email)) {
-            JOptionPane.showMessageDialog(this, "Please Enter a Valid Email Address.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        
-        try {
-            double percentageX = Double.parseDouble(x);
-            if (percentageX < 35 || percentageX > 100 ) 
-        	{
-                JOptionPane.showMessageDialog(this, "Class X Percentages Must be Between 35 and 100.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            if (tfxii.isEnabled()) 
-            { 
-            	double percentageXII = Double.parseDouble(xii); 
-            	 if ( percentageXII < 35 || percentageXII > 100) 
-            	 {
-                     JOptionPane.showMessageDialog(this, "Class XII Percentages Must be Between 35 and 100.", "Error", JOptionPane.ERROR_MESSAGE);
-                     return;
-                 }
-            }
-            
-            
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Class X and XII Percentages Must be Numeric.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-    }
- 
- 
- */

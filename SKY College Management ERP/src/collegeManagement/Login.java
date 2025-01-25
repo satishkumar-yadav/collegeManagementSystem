@@ -1,6 +1,8 @@
 package collegeManagement;
 
 import jdbcGUI.LoginDB;
+import temp.AddNewStudent;
+import temp.AddNewTeacher;
 import temp2.DatabaseSchemaCreator;
 
 import java.awt.Color;
@@ -35,10 +37,11 @@ import java.util.Scanner;
 
 public class Login extends JFrame implements ActionListener {
 
-	JButton blogin, bcancel, bforget, bdatabase;
+	JButton blogin, bcancel, bforget, bdatabase, bregister, bnext, bforgetId;
     JTextField tfusername ;
+    JLabel lbNewRole,lb11, lbnew ;
     JPasswordField tfpassword;
-    JComboBox jcbrole, jcbrole2;
+    JComboBox jcbrole, jcbrole2, jcbrole3;
     PreparedStatement ps;
     JDialog loadingDialog;
     
@@ -49,7 +52,7 @@ public class Login extends JFrame implements ActionListener {
 	
 	public Login()
 	{
-		JLabel lb0,lb1,lb2,lb3,lb4,lb5,lb6,lb7,lb8,lb9,lb10,lb11;
+		JLabel lb0,lb1,lb2,lb3,lb4,lb5,lb6,lb7,lb8,lb9,lb10;
 		
 		setTitle("Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -93,7 +96,7 @@ public class Login extends JFrame implements ActionListener {
         Image img2 = img.getImage().getScaledInstance(290, 350, Image.SCALE_DEFAULT);
         ImageIcon img3 = new ImageIcon(img2);
         lb3 = new JLabel(img3);
-        lb3.setBounds(530, 230, 290, 350);
+        lb3.setBounds(530, 200, 290, 350);
         add(lb3);
         
      // Role Selection
@@ -199,6 +202,27 @@ public class Login extends JFrame implements ActionListener {
         lb11.setFont(new Font("Tahoma", Font.BOLD, 17));
         add(lb11);
         
+        lbnew = new JLabel("New Here ??  ");
+        lbnew.setBounds(100, 530, 200, 30);
+        lbnew.setForeground(Color.YELLOW);
+        lbnew.setFont(new Font("Tahoma", Font.BOLD, 17));
+        add(lbnew);
+        
+        lbNewRole = new JLabel("Select Your Role ");
+        lbNewRole.setBounds(100, 560, 200, 30);
+        lbNewRole.setForeground(Color.YELLOW);
+        lbNewRole.setFont(new Font("Tahoma", Font.BOLD, 17));
+      //  lbNewRole.setVisible(true);
+        add(lbNewRole);
+        
+        String role3[] = {"Select","New Student","New Teacher","New Faculty" };
+        
+        jcbrole3 = new JComboBox(role3);
+        jcbrole3.setBounds(340,565,100,25);
+        jcbrole3.setForeground(Color.MAGENTA);
+    //    jcbrole3.setVisible(true);
+        add(jcbrole3);
+        
      // Buttons
         blogin =new JButton("Login");
         blogin.setBounds(80, 420, 100, 40);
@@ -223,6 +247,31 @@ public class Login extends JFrame implements ActionListener {
         bforget.setFont(new Font("Tahoma", Font.BOLD, 16));
         bforget.addActionListener(this);
         add( bforget);
+        
+        bforgetId =new JButton("Forget User ID !");
+        bforgetId.setBounds(570, 505, 220, 25);
+        bforgetId.setBackground(Color.ORANGE);
+        bforgetId.setForeground(Color.BLACK);
+        bforgetId.setFont(new Font("Tahoma", Font.BOLD, 16));
+        bforgetId.addActionListener(this);
+        add( bforgetId);
+        
+        bregister =new JButton("Register Now");
+        bregister.setBounds(340, 535, 220, 25);
+        bregister.setBackground(Color.ORANGE);
+        bregister.setForeground(Color.RED);
+        bregister.setFont(new Font("Tahoma", Font.BOLD, 16));
+        bregister.addActionListener(this);
+        add( bregister);
+        
+        bnext =new JButton("Next");
+        bnext.setBounds(460, 565, 100, 25);
+      //  bnext.setBackground(Color.ORANGE);
+        bnext.setForeground(Color.MAGENTA);
+        bnext.setFont(new Font("Tahoma", Font.BOLD, 16));
+        bnext.addActionListener(this);
+      //  bnext.setVisible(false);
+        add( bnext);
        
         bdatabase =new JButton("DataBase");
         bdatabase.setBounds(190, 420, 140, 40);
@@ -231,6 +280,8 @@ public class Login extends JFrame implements ActionListener {
         bdatabase.setFont(new Font("Tahoma", Font.BOLD, 16));
         bdatabase.addActionListener(this);
         add( bdatabase);   
+        
+        hideRegister();
         
      // Set visibility based on database button state
         toggleButtonsVisibility(isDatabaseVisible());
@@ -273,15 +324,42 @@ public class Login extends JFrame implements ActionListener {
 			new ForgetPassword();
 			setVisible(false);
 		}
+		else if (ae.getSource() == bforgetId )
+		{
+			new ForgetUserId() ;
+			setVisible(false);
+		}
+		else if (ae.getSource() == bregister )
+		{
+			showRegister();
+		}
+		else if (ae.getSource() == bnext )
+		{
+			handleNext();
+			hideRegister();
+		//	setVisible(false);
+		}
 		else if (ae.getSource() == bdatabase )
 		{
-			Database.createDatabaseSchema();
-            disableDatabaseButton(); // Disable the button after it's clicked
+			 getCredential();
+			
+		//	Database.createDatabaseSchema();
+   //         disableDatabaseButton(); // Disable the button after it's clicked
            // toggleButtonsVisibility(false);
             toggleButtonsVisibility(isDatabaseVisible());
 		}
 	}
 	
+	
+    private void getCredential() 
+    {
+    	String username = tfusername.getText().trim();
+	    String passWord = tfpassword.getText().trim();
+    	
+	    JdbcConnection jdc = new JdbcConnection  ();
+	    jdc.databaseCredential( username, passWord);
+    	
+    }
 	
 	private void handleLogin() {
 		String userName = tfusername.getText().trim();
@@ -406,22 +484,22 @@ public class Login extends JFrame implements ActionListener {
 	                                 break;
 	         
               case "Teacher" :
-	                                 new Teacher(id);
+	                                 new Teacher(Role,id);
 	                                // JOptionPane.showMessageDialog(this, "  Welcome Teacher, Login Successful.  ");
 	                                 break;
 	         
               case "Student" :
-	                                 new Student(id);
+	                                 new Student(Role,id);
 	                                // JOptionPane.showMessageDialog(this, "  Welcome Student, Login Successful.  ");
 	                                 break;
 	         
               case "Librarian" :
-	                               // new Librarian(id);
+	                               // new Librarian(Role,id);
 	                                JOptionPane.showMessageDialog(this, "  Welcome Librarian, Login Successful.  ");
 	                                break;
 	                                
               case "Database" :
-                                  // new Database(id);
+                                  // new Database(Role,id);
             	                   JOptionPane.showMessageDialog(this, "  Welcome Database, Login Successful.  ");
             	                  // LoginDB ldb = new LoginDB();
             	                   // ldb.LoginDB();
@@ -451,6 +529,39 @@ public class Login extends JFrame implements ActionListener {
         }
     }
     
+    private void handleNext() {
+		String Role = (String) jcbrole3.getSelectedItem(); 
+    	
+         if ( "Select".equals(Role)) {
+        	
+            JOptionPane.showMessageDialog(this, "Select Your Role First !");
+            return;
+        }	
+         
+         switch(Role)
+         {
+               case "New Faculty" :
+         	                    // new AddNewFaculty();
+         	                     JOptionPane.showMessageDialog(this, " Faculty Register Open Soon.. ");
+         	                     break;
+ 	         
+               case "New Teacher" :
+ 	                                 new AddNewTeacher();
+ 	                                 setVisible(false);
+ 	                                // JOptionPane.showMessageDialog(this, "Register Teacher.  ");
+ 	                                 break;
+ 	         
+               case "New Student" :
+ 	                                 new AddNewStudent();
+ 	                                 setVisible(false);
+ 	                               //  JOptionPane.showMessageDialog(this, "Register Student.  ");
+ 	                                 break;
+ 	         
+               default:
+                                 JOptionPane.showMessageDialog(this, "Unknown Role");
+ 	         
+         }
+    }
     
     
     // Method to check if the project is being run for the first time
@@ -516,6 +627,12 @@ public class Login extends JFrame implements ActionListener {
         blogin.setVisible(!isDatabaseVisible);
         bcancel.setVisible(!isDatabaseVisible);
         bforget.setVisible(!isDatabaseVisible);
+        bforgetId.setVisible(!isDatabaseVisible);
+        bregister.setVisible(!isDatabaseVisible);
+        lb11.setVisible(!isDatabaseVisible);
+        lbnew.setVisible(!isDatabaseVisible);
+        jcbrole.setEnabled(!isDatabaseVisible);
+        jcbrole2.setEnabled(!isDatabaseVisible);
         bdatabase.setVisible(isDatabaseVisible);
     }
     
@@ -538,6 +655,20 @@ public class Login extends JFrame implements ActionListener {
         //loadingDialog.dispose();
      //   loadingDialog.hide();
       //  loadingDialog.setVisible(false);
+    }
+    
+    private void hideRegister() {
+       
+    	lbNewRole.setVisible(false);
+		jcbrole3.setVisible(false);
+		bnext.setVisible(false);
+    }
+    
+    private void showRegister() {
+        
+    	lbNewRole.setVisible(true);
+		jcbrole3.setVisible(true);
+		bnext.setVisible(true);
     }
     
 	public static void main(String[] args) {  new Login();  }

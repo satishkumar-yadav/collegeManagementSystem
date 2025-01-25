@@ -1,4 +1,4 @@
-package collegeManagement;
+package temp;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -24,6 +24,8 @@ import javax.swing.SwingUtilities;
 
 import admin.AddStudent;
 import admin.AddTeacher;
+import collegeManagement.JdbcConnection;
+import collegeManagement.Login;
 
 public class Credential extends JFrame implements ActionListener
 {
@@ -34,11 +36,14 @@ public class Credential extends JFrame implements ActionListener
 	JLabel lb1,lb2,lb3,lb4,lb5,lb6,lb7,lb8, lb9, lb10, lblrole,lblid ;
 	String role = "";
 	String id = "";
+	String phone = "";
 	
-	public Credential(String Role, String id)
+	public Credential(String Role, String id,String phone)
 	{
 		role = Role;
 		this.id=id;
+		this.phone=phone;
+		
         setTitle("Login Credential");
       //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setBackground(Color.WHITE);
@@ -118,12 +123,12 @@ public class Credential extends JFrame implements ActionListener
         lb10.setFont(new Font("Arial", Font.BOLD, 20));
         add(lb10);
         
-        tfsecAns = new JTextField("enter Sec Ans (Case Sensitive)");
+        tfsecAns = new JTextField("enter Sec Ans ");
         tfsecAns.setBounds(380, 300, 240, 30);
         tfsecAns.setFont(new Font("Arial", Font.BOLD, 15));
         tfsecAns.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (tfsecAns.getText().equals("enter Sec Ans (Case Sensitive)")) {
+                if (tfsecAns.getText().equals("enter Sec Ans ")) {
                 	tfsecAns.setText("");
                 }
             }
@@ -201,8 +206,10 @@ public class Credential extends JFrame implements ActionListener
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                redirectToPrevPage();
+            	setDefaultCredential();
+            	redirectToLogin();
             }
+
         });
      
         setSize(700,600);
@@ -225,6 +232,7 @@ public class Credential extends JFrame implements ActionListener
 		}
 		else if ( ae.getSource() == bback )
 		{
+			setDefaultCredential();
 			 redirectToPrevPage();
 		}
 		
@@ -234,11 +242,11 @@ public class Credential extends JFrame implements ActionListener
 	 private void redirectToPrevPage() {
 		 if(role.equals("Student") ) {
 			  setVisible(false); 
-		        new AddStudent();
+		        new AddNewStudent();
 		 }
 		 else if(role.equals("Teacher")){
 			  setVisible(false); 
-		        new AddTeacher();
+		        new AddNewTeacher();
 		 }
 		 else {
 	        setVisible(false); 
@@ -253,7 +261,7 @@ public class Credential extends JFrame implements ActionListener
 			String passWord2 = tfpassword2.getText().trim();
 			String secAns = tfsecAns.getText().trim();
 		    String secQues = (String)jcsecQues.getSelectedItem(); 		   				
-            if (  !( userName.isEmpty())  && !( userName.equals("enter username or userid") ) && !("Select".equals(secQues)) && !( secAns.isEmpty())  && !( secAns.equals("enter Sec Ans (Case Sensitive)") ) && !(passWord.isBlank() ) && !(passWord2.isBlank() ) && !(passWord.equals("enter password") ) ) 
+            if (  !( userName.isEmpty())  && !( userName.equals("enter username or userid") ) && !("Select".equals(secQues)) && !( secAns.isEmpty())  && !( secAns.equals("enter Sec Ans ") ) && !(passWord.isBlank() ) && !(passWord2.isBlank() ) && !(passWord.equals("enter password") ) ) 
              {   handleInsert();       } 
             else {  JOptionPane.showMessageDialog(this, "Enter All Details First ");     return;  }  
           }
@@ -285,14 +293,14 @@ public class Credential extends JFrame implements ActionListener
 		                  String query = null;
 		                  if ("student".equalsIgnoreCase(Role)) 
 		                  {
-		                	  query = "insert into login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT rollno FROM student WHERE rollno = ?) ) ";
+		                	  query = "insert into temp_login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT rollno FROM temp_student WHERE rollno = ?) ) ";
 		                  } else if ("teacher".equalsIgnoreCase(Role)) 
 		                  {
-		                	  query = "insert into login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT empid FROM teacher WHERE empid = ?) ) ";
+		                	  query = "insert into temp_login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT empid FROM temp_teacher WHERE empid = ?) ) ";
 		                  }
 		                  else if ("faculty".equalsIgnoreCase(Role)) 
 		                  {
-		                	  query = "insert into login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT empid FROM faculty WHERE empid = ?) ) ";
+		                	  query = "insert into temp_login ( role, username, password, sec_ques, sec_ans, id) values ( ?, ?, ?, ?, ?, (SELECT empid FROM temp_faculty WHERE empid = ?) ) ";
 		                  }
 		                  
 		                  PreparedStatement ps = con.prepareStatement(query);
@@ -311,20 +319,7 @@ public class Credential extends JFrame implements ActionListener
 		    				{
 		    		    	  JOptionPane.showMessageDialog(this, "Credential Created Successfully.");
 		    		    	  resetUI();
-		    		    	  if ("student".equalsIgnoreCase(Role)) 
-			                  {
-			                	 new AddStudent();
-			                	 setVisible(false);
-			                  } else if ("teacher".equalsIgnoreCase(Role)) 
-			                  {
-			                	     new AddTeacher();
-				                	 setVisible(false);  
-			                  }
-			                  else if ("faculty".equalsIgnoreCase(Role)) 
-			                  {
-			                	  //  new AddFaculty();
-				                	 setVisible(false);
-			                  }
+		    		    	  redirectToLogin();
 		    		    	  
 		    				}
 		    				else
@@ -344,6 +339,58 @@ public class Credential extends JFrame implements ActionListener
 			}  
 	    }
 	 
+	 private void setDefaultCredential() {
+			
+		    String Id = id;
+		    String userName = Id;
+			String passWord = phone;
+			String Role = role;
+		 
+		 try {
+             JdbcConnection dfcon = new JdbcConnection();
+             //JOptionPane.showMessageDialog(this, "  Connection Successful !! ");
+             String dquery = null;
+             if ("student".equalsIgnoreCase(Role)) 
+             {
+           	  dquery = "insert into temp_login ( role, username, password, id) values ( ?, ?, ?, (SELECT rollno FROM temp_student WHERE rollno = ?) ) ";
+             } else if ("teacher".equalsIgnoreCase(Role)) 
+             {
+           	  dquery = "insert into temp_login ( role, username, password, id) values ( ?, ?, ?, (SELECT empid FROM temp_teacher WHERE empid = ?) ) ";
+             }
+             else if ("faculty".equalsIgnoreCase(Role)) 
+             {
+           	  dquery = "insert into temp_login ( role, username, password, id) values ( ?, ?, ?, (SELECT empid FROM temp_faculty WHERE empid = ?) ) ";
+             }
+             
+             PreparedStatement dps = dfcon.prepareStatement(dquery);
+             dps.setString(1, Role);
+             dps.setString(2, userName);
+             dps.setString(3, passWord);
+             dps.setString(4, Id);
+             // JOptionPane.showMessageDialog(this, "Executing Query : "+queryupdate);   
+             
+             int dflag = dps.executeUpdate();
+		     // ps.close();
+           
+		      if( dflag == 1 )
+				{
+		    	  JOptionPane.showMessageDialog(this, "Default Credential Created.");
+		    	  resetUI();
+		    	 // redirectToLogin();
+		    	  
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(this, "Default Credential Creation Failed !");
+					return;
+				}
+         } 
+       catch (Exception e) 
+       {   
+           JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+       }
+		 
+  }
 		 
 	private void resetUI() {
 	    tfusername.setText("enter username or userid");
@@ -354,6 +401,10 @@ public class Credential extends JFrame implements ActionListener
 		
 	}
 
+	 private void redirectToLogin() {
+	        setVisible(false); 
+	        new Login(); 
+	    }
 	
 	// public static void main (String args[])  {  new Credential() ;  }
 }

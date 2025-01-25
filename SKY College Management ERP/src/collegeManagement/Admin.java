@@ -17,7 +17,12 @@ import javax.swing.JOptionPane;
 
 import admin.AddStudent;
 import admin.AddTeacher;
+import admin.FeeStructure;
+import admin.Marks;
+import admin.NewStudent;
+import admin.PendingStudentLeave;
 import admin.StudentDetails;
+import admin.StudentFeeForm;
 import admin.StudentLeave;
 import admin.StudentLeaveDetails;
 import admin.TeacherDetails;
@@ -33,11 +38,13 @@ import admin.UpdateTeacher;
 
 public class Admin extends JFrame implements ActionListener {
 
-	Admin() {
-   	 setSize(1200, 600);
-   	setResizable(true);   // Responsive Design:
+	public Admin() {
+		
+   	   setSize(1200, 600);
+   	   setResizable(true);   // Responsive Design:
 
-   	
+   	   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   	 
        setTitle("Admin");
        
        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/third.jpg"));
@@ -122,6 +129,11 @@ public class Admin extends JFrame implements ActionListener {
        studentleave.setBackground(Color.WHITE);
        studentleave.addActionListener(this);
        leave.add(studentleave);
+       
+       JMenuItem approveStudentleave = new JMenuItem("Pending Student Leave");
+       approveStudentleave.setBackground(Color.WHITE);
+       approveStudentleave.addActionListener(this);
+       leave.add(approveStudentleave);
        
        // Leave Details
        JMenu leaveDetails = new JMenu("Leave Details");
@@ -259,7 +271,8 @@ public class Admin extends JFrame implements ActionListener {
        } else if (msg.equals("New Student Information")) {
            new AddStudent();
        } else if (msg.equals("Approve New Student Information")) {
-    	   JOptionPane.showMessageDialog(this, "Approving new Student Information.");
+    	   new NewStudent();
+    	   // JOptionPane.showMessageDialog(this, "Approving new Student Information.");
        } else if (msg.equals("Approve New Teacher Information")) {
     	   JOptionPane.showMessageDialog(this, "Approving new Teacher Information.");
        }else if (msg.equals("Approve New Faculty Information")) {
@@ -287,13 +300,16 @@ public class Admin extends JFrame implements ActionListener {
        } else if (msg.equals("Enter Marks")) {
           // new EnterMarks();
        } else if (msg.equals("Examination Results")) {
-          // new ExaminationDetails();
+           new Marks();
        } else if (msg.equals("Fee Structure")) {
-          // new FeeStructure();
-       } else if (msg.equals("About")) {
+           new FeeStructure();
+       } else if (msg.equals("About")) {          
            new About();
        } else if (msg.equals("Student Fee Form")) {
-         //  new StudentFeeForm();
+           new StudentFeeForm();
+       }
+       else if (msg.equals("Pending Student Leave")) {
+           new PendingStudentLeave();
        }
        else if (msg.equals("Logout")) {
            new Login();

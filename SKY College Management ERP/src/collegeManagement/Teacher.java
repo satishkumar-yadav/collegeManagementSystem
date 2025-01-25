@@ -33,19 +33,21 @@ import teacher.ViewTeacherProfile;
 public class Teacher extends JFrame implements ActionListener {
 
 	String empid = "";
+	String role = "";
 	JLabel picLabel, labelname;
 	FileInputStream fis;
     InputStream is;
     File selectedFile ;
     ImageIcon icon = null ;
 	
-	Teacher(String empid) {
+	Teacher( String role,String empid) {
 	   this.empid = empid;
+	   this.role = role;
 		
    	   setSize(1200, 700);
    	
        setTitle("Teacher");
-     //  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
               
        picLabel = new JLabel("      No Picture Available  ");
@@ -96,6 +98,11 @@ public class Teacher extends JFrame implements ActionListener {
        profileUpdate.setBackground(Color.WHITE);
        profileUpdate.addActionListener(this);
        profile.add(profileUpdate);
+       
+       JMenuItem credentialUpdate = new JMenuItem("Update Credential");
+       credentialUpdate.setBackground(Color.WHITE);
+       credentialUpdate.addActionListener(this);
+       profile.add(credentialUpdate);
        
        // Leave Details
        JMenu leaveDetails = new JMenu("Leave");
@@ -305,6 +312,10 @@ public class Teacher extends JFrame implements ActionListener {
        else if (msg.equals("View Notice")) {
     	   JOptionPane.showMessageDialog(this, "Showing Notice."); 
           // new Notice();
+       }
+       else if (msg.equals("Update Credential")) {
+    	   new UpdateCredential(role, empid);
+    	   setVisible(false);
        }
        
    }

@@ -5,9 +5,9 @@ import java.sql.*;
 import javax.swing.JOptionPane;
 
 public class Generator {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/collegemanagement";
-    private static final String DB_USERNAME = "root";
-    private static final String DB_PASSWORD = "12345678";
+//    private static final String DB_URL = "jdbc:mysql://localhost:3306/collegemanagement";
+//    private static final String DB_USERNAME = "root";
+//    private static final String DB_PASSWORD = "12345678";
 
     // Method to fetch course code (overloaded for course name)
     public int[] getCode( String type, String Name1, String Name2 ) {
@@ -22,10 +22,14 @@ public class Generator {
         } 
         
         int[] code = new int[2];
-        try (Connection gccon = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+    /*    try (Connection gccon = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement pst1 = gccon.prepareStatement(query1);
-        	 PreparedStatement pst2 = gccon.prepareStatement(query2)	) 
+        	 PreparedStatement pst2 = gccon.prepareStatement(query2)	)   */
+        try
         {
+        	JdbcConnection gccon = new JdbcConnection();
+        	PreparedStatement pst1 = gccon.prepareStatement(query1);
+        	PreparedStatement pst2 = gccon.prepareStatement(query2);	
             pst1.setString(1, Name1);
             pst2.setString(1, Name2);
             ResultSet rs1 = pst1.executeQuery();
@@ -43,13 +47,7 @@ public class Generator {
         }
         return code ;
         
-//      else if ("branch".equalsIgnoreCase(type)) {
-//      query = "SELECT BranchCode FROM Branches WHERE BranchName = ?";
-//  } 
-//  else if ("role".equalsIgnoreCase(type)) {
-//      query = "SELECT roleCode FROM Roles WHERE role = ?";
-//  }
-    }
+ }
 
     // Method to fetch roll number or employee ID counter
     public int getCounter( String type, String year, String courseOrDeptName, String branchOrRole ) {
@@ -59,10 +57,11 @@ public class Generator {
         } else if ("department".equalsIgnoreCase(type)) {
             query = "SELECT Counter FROM EmpIdCounters WHERE Year = ? AND department = ? and role = ? ";
         }
-
         int counter = 0;
-        try (Connection gccon = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement pst = gccon.prepareStatement(query)) {
+        try
+        {
+        	JdbcConnection gccon = new JdbcConnection();
+        	PreparedStatement pst = gccon.prepareStatement(query);
             pst.setString(1, year);
             pst.setString(2, courseOrDeptName);
             pst.setString(3, branchOrRole);
@@ -70,11 +69,42 @@ public class Generator {
             if (rs.next()) {
                 counter = rs.getInt("Counter");
             }
+            else {
+                // If no counter exists, insert a new row with Counter = 1
+                insertInitialCounter(type, year, courseOrDeptName, branchOrRole);
+                counter = 1; // Set the initial counter value
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return counter;
     }
+    
+    // Method to insert an initial counter
+    private void insertInitialCounter(String type, String year, String courseOrDeptName, String branchOrRole) {
+        String query = null;
+
+        if ("course".equalsIgnoreCase(type)) {
+            query = "INSERT INTO RollNumberCounters (Year, Course, BranchName, Counter) VALUES (?, ?, ?, 1)";
+        } else if ("department".equalsIgnoreCase(type)) {
+            query = "INSERT INTO EmpIdCounters (Year, department, role, Counter) VALUES (?, ?, ?, 1)";
+        }
+
+        try {
+            JdbcConnection gccon = new JdbcConnection();
+            PreparedStatement pst = gccon.prepareStatement(query);
+
+            pst.setString(1, year);
+            pst.setString(2, courseOrDeptName);
+            pst.setString(3, branchOrRole);
+
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
 
     // Method to update roll number or employee ID counter
     public void updateCounter(String Year, String courseOrDeptName, String branchOrRole, String type) {
@@ -85,9 +115,10 @@ public class Generator {
         } else if ("department".equalsIgnoreCase(type)) {
             query = "UPDATE EmpIdCounters SET Counter = Counter + 1 WHERE Year = ? AND department = ? and role = ? ";
         }
-
-        try (Connection con = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try
+        {
+        	JdbcConnection con = new JdbcConnection();
+        	PreparedStatement pst = con.prepareStatement(query);
             pst.setInt(1, year);
             pst.setString(2, courseOrDeptName);
             pst.setString(3, branchOrRole);
@@ -108,13 +139,115 @@ public class Generator {
       //  JOptionPane.showMessageDialog(null, " Counter : "+counter , "Success", JOptionPane.INFORMATION_MESSAGE);
         
         // Format: [Year][Code][Counter] -> Example: 20101201
-        String id = String.format("%02d%02d %02d%02d", year, code[0], code[1], counter);
+        String id = String.format("%02d%02d%02d%02d", year, code[0], code[1], counter);
+        return id;
+    }  
+   
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+    
+    public int getTempCounter( String type, String year, String courseOrDeptName, String branchOrRole ) {
+        String query = null;
+        if ("course".equalsIgnoreCase(type)) {
+            query = "SELECT Counter FROM temp_RollNumberCounters WHERE yoa = ? AND Course = ? and BranchName = ? ";
+        } else if ("department".equalsIgnoreCase(type)) {
+            query = "SELECT Counter FROM temp_EmpIdCounters WHERE yoj = ? AND department = ? and role = ? ";
+        }
+
+        int counter = 0;
+        try
+        {
+        	JdbcConnection gtcon = new JdbcConnection();
+        	PreparedStatement gpst = gtcon.prepareStatement(query);
+        	
+        	gpst.setString(1, year);
+        	gpst.setString(2, courseOrDeptName);
+        	gpst.setString(3, branchOrRole);
+            ResultSet rs = gpst.executeQuery();
+            if (rs.next()) {
+                counter = rs.getInt("Counter");
+            }
+            else {
+                // If no counter exists, insert a new row with Counter = 1
+                insertInitialTempCounter(type, year, courseOrDeptName, branchOrRole);
+                counter = 1; // Set the initial counter value
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return counter;
+    }
+    
+    
+    private void insertInitialTempCounter(String type, String year, String courseOrDeptName, String branchOrRole) {
+        String query = null;
+
+        if ("course".equalsIgnoreCase(type)) {
+            query = "INSERT INTO temp_RollNumberCounters (yoa, course, BranchName, Counter) VALUES (?, ?, ?, 1)";
+        } else if ("department".equalsIgnoreCase(type)) {
+            query = "INSERT INTO temp_EmpIdCounters (yoj, department, role, Counter) VALUES (?, ?, ?, 1)";
+        }
+
+        try {
+            JdbcConnection gccon = new JdbcConnection();
+            PreparedStatement pst = gccon.prepareStatement(query);
+
+            pst.setString(1, year);
+            pst.setString(2, courseOrDeptName);
+            pst.setString(3, branchOrRole);
+
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
+
+    // Method to update roll number or employee ID counter
+    public void updateTempCounter(String Year, String courseOrDeptName, String branchOrRole, String type) {
+    	int year = Integer.parseInt(Year);
+        String query = null;
+        if ("course".equalsIgnoreCase(type)) {
+            query = "UPDATE temp_RollNumberCounters SET Counter = Counter + 1 WHERE yoa = ? AND Course = ? and BranchName = ? ";
+        } else if ("department".equalsIgnoreCase(type)) {
+            query = "UPDATE temp_EmpIdCounters SET Counter = Counter + 1 WHERE yoj = ? AND department = ? and role = ? ";
+        }
+        
+        try
+        {
+        	JdbcConnection tcon = new JdbcConnection();
+        	PreparedStatement tpst = tcon.prepareStatement(query);
+        	
+        	tpst.setInt(1, year);
+        	tpst.setString(2, courseOrDeptName);
+        	tpst.setString(3, branchOrRole);
+        	tpst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to generate roll number or employee ID (overloaded for course/department)
+    public String generateTempID(String admissionYear, String courseOrDeptName, String branchOrRole , String type) {
+        int year = Integer.parseInt(admissionYear.substring(admissionYear.length() - 2));
+        int counter = getTempCounter(type, admissionYear, courseOrDeptName, branchOrRole);
+        int[] code = getCode(type, courseOrDeptName, branchOrRole );
+        
+      //  JOptionPane.showMessageDialog(null, "Year : "+year , "Success", JOptionPane.INFORMATION_MESSAGE);
+      //  JOptionPane.showMessageDialog(null, "Course Code : "+code[0]+" , Branch Code : "+code[1] , "Success", JOptionPane.INFORMATION_MESSAGE);
+      //  JOptionPane.showMessageDialog(null, " Counter : "+counter , "Success", JOptionPane.INFORMATION_MESSAGE);
+        
+        // Format: [Year][Code][Counter] -> Example: 20101201
+      //  String id = String.format("%02d%02d", year, counter);         // better for temp counter
+        String id = String.format("%02d%02d%02d%02d", year, code[0], code[1], counter);
 
         // Update counter after generating the ID
       //  updateCounter(year, courseOrDeptName, type);
 
         return id;
     }
+    
 }
 
 

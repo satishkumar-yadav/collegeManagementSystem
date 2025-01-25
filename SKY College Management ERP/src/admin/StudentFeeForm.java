@@ -1,6 +1,9 @@
-package collegeManagement;
+package admin;
 
 import javax.swing.*;
+
+import collegeManagement.JdbcConnection;
+
 import java.awt.*;
 import java.sql.*;
 import java.awt.event.*;
@@ -12,14 +15,15 @@ public class StudentFeeForm extends JFrame implements ActionListener {
     JLabel labeltotal;
     JButton update, pay, back;
     
-    StudentFeeForm() {
+    public StudentFeeForm() {
+    	
         setSize(900, 500);
         setLocation(300, 100);
         setLayout(null);
-        
+       // setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(Color.WHITE);
         
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icons/fee.jpg"));
+        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/fee.jpg"));
         Image i2 = i1.getImage().getScaledInstance(500, 300, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel image = new JLabel(i3);
@@ -66,9 +70,9 @@ public class StudentFeeForm extends JFrame implements ActionListener {
         add(labelfname);
         
         try {
-        	JdbcConnection c1 = new JdbcConnection();
+        	JdbcConnection c2 = new JdbcConnection();
             String query = "select * from student where rollno='"+crollno.getSelectedItem()+"'";
-            ResultSet rs = c1.st.executeQuery(query);
+            ResultSet rs = c2.st.executeQuery(query);
             while(rs.next()) {
                 labelname.setText(rs.getString("name"));
                 labelfname.setText(rs.getString("fname"));
@@ -200,9 +204,7 @@ public class StudentFeeForm extends JFrame implements ActionListener {
         }
     }
 
-    public static void main(String[] args) {
-        new StudentFeeForm();
-    }
+  //  public static void main(String[] args) {     new StudentFeeForm();   }
 }
 
 
