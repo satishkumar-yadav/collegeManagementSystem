@@ -30,11 +30,12 @@ public class Database {
 		 {
 			 JdbcConnection jdc = new JdbcConnection();
 			 Connection con = jdc.getConnection();
-			 JOptionPane.showMessageDialog(null, "Connected Successfully!");
 			 
-			// Statement stmt = con.createStatement();
+			// JOptionPane.showMessageDialog(null, "Connected Successfully!");
+			 
+			 Statement stmt = con.createStatement();
 			// Statement stmt = jdc.createStatement();
-			 JOptionPane.showMessageDialog(null, "Statement Creatment Successfully!");
+		//	 JOptionPane.showMessageDialog(null, "Statement Creatment Successfully!");
 
 	            // Execute the SQL script
 	          //  stmt.execute(SQL_SCRIPT);
@@ -45,14 +46,14 @@ public class Database {
 	           // 	 JOptionPane.showMessageDialog(null, "Trim SQL : > "+sql.trim());       	
 	      //      JOptionPane.showMessageDialog(null, "SQL Executing : > "+stmt.execute(sql.trim()));
 	            	
-	              //  stmt.execute(sql.trim());
+	                stmt.execute(sql.trim());
 	            }
-	            JOptionPane.showMessageDialog(null, "Script1 Executed Successfully!");
+	          //  JOptionPane.showMessageDialog(null, "Script1 Executed Successfully!");
 	            
 	            for (String sql2 : SQL_SCRIPT2) {
-	               // stmt.execute(sql2.trim());
+	                stmt.execute(sql2.trim());
 	            }
-	            JOptionPane.showMessageDialog(null, "Script2 Executed Successfully!");
+	           // JOptionPane.showMessageDialog(null, "Script2 Executed Successfully!");
 	            
 	            // Show success message
 	            JOptionPane.showMessageDialog(null, "Database Schema Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);

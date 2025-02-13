@@ -341,12 +341,18 @@ public class Login extends JFrame implements ActionListener {
 		}
 		else if (ae.getSource() == bdatabase )
 		{
-			 getCredential();
+			 getCredential() ;
 			
-		//	Database.createDatabaseSchema();
-   //         disableDatabaseButton(); // Disable the button after it's clicked
+			
+			Database.createDatabaseSchema();
+            disableDatabaseButton(); // Disable the button after it's clicked
            // toggleButtonsVisibility(false);
             toggleButtonsVisibility(isDatabaseVisible());
+            
+            tfusername.setText("enter username or userid");
+			tfpassword.setText("enter password");
+			
+			
 		}
 	}
 	
@@ -355,10 +361,51 @@ public class Login extends JFrame implements ActionListener {
     {
     	String username = tfusername.getText().trim();
 	    String passWord = tfpassword.getText().trim();
+	    
+	     if (  username.isBlank() && passWord.equalsIgnoreCase("enter password")  )
+		   {
+			   username = "root";
+			   passWord = "12345678";
+	           
+	          // JOptionPane.showMessageDialog(null, " From  default pass, UserName: < "+username+"  >, PassWord : < "+passWord);
+	          
+	       } 
+	     else if (  username.isBlank() &&  ( !passWord.equalsIgnoreCase("enter password") &&  !passWord.isBlank() ) )
+		   {
+			   username = "root"; 
+	           
+	          // JOptionPane.showMessageDialog(null, " From username Blank , UserName: < "+username+"  >, PassWord : < "+passWord);
+	           
+	       }
+	   
+	   else if (  !username.isBlank() && passWord.isBlank()  )
+	   {
+		   passWord = "12345678";
+           
+          // JOptionPane.showMessageDialog(null, " From password Blank 1, UserName: < "+username+"  >, PassWord : < "+passWord);
+           
+       }
+	   else if (  !username.isBlank() &&  passWord.equalsIgnoreCase("enter password")  )
+	   {
+		   passWord = "12345678";
+           
+         //  JOptionPane.showMessageDialog(null, " From password Blank 2, UserName: < "+username+"  >, PassWord : < "+passWord);
+           
+       }
+      
+ //      else
+    //   {
+	   //  JdbcConnection jdc= new JdbcConnection();
+	     JdbcConnection.putCredential ( username,  passWord);
+	     
+	   //  new JdbcConnection();
     	
-	    JdbcConnection jdc = new JdbcConnection  ();
-	    jdc.databaseCredential( username, passWord);
-    	
+	     // JOptionPane.showMessageDialog(null, " Inside Else loop ");
+	 //    return true;
+ //      }
+     //   JOptionPane.showMessageDialog(null, " Outside if-else loop ");
+     //  return false ;
+       
     }
 	
 	private void handleLogin() {
@@ -397,12 +444,16 @@ public class Login extends JFrame implements ActionListener {
          	// JdbcConnection con = new JdbcConnection();
          	
          	JdbcConnection c1 = new JdbcConnection();
+         	
+       
          	// JOptionPane.showMessageDialog(this, "  Connection Successful !! ");
          	
          	 // Secure query with PreparedStatement
              String querylogin = "SELECT * FROM login WHERE role = ? AND username = ? AND password = ?";
             
              PreparedStatement ps = c1.prepareStatement(querylogin);
+          
+                       
              ps.setString(1, Role);
              ps.setString(2, userName);
              ps.setString(3, passWord);

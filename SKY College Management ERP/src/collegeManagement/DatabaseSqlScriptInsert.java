@@ -43,7 +43,7 @@ public class DatabaseSqlScriptInsert {
 			 (55, 'Civil'),
 			 (66, 'Account'),
 			 (77, 'Examination'),
-			 (08, 'Library'),
+			 (88, 'Library'),
 			 (99, 'Mathematics'),
 			 (92, 'Physics'),
 			 (82, 'Literature')

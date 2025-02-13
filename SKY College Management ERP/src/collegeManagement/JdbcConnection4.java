@@ -1,69 +1,56 @@
 package collegeManagement;
 
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
 import java.sql.*;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
 
-public class JdbcConnection3 {
-    private static final String FILE_PATH = "database.txt";
+public class JdbcConnection4 {
+    private static final String FILE_PATH = "database.txt"; // Keep it in a restricted folder if possible
     private final String path = "com.mysql.cj.jdbc.Driver";
-    private static String userid;                 // added static
-    private static String passWord;         // added static
-    private String dbName = null; // Initially set to null on first run
+    private static String userid;
+    private static String passWord;
+    private String dbName = null;
     private String url;
-  //  private final String url = "jdbc:mysql://localhost:3306/" + dbName;
     private Connection con;
     public Statement st;
 
-    public JdbcConnection3() {
+    public JdbcConnection4() {
         try {
-            // Load database credentials dynamically
+            // Secure file permissions
+            secureFile();
+
+            // Load database credentials
             loadCredentials();
 
             // Set database URL
-            if (dbName == null) {
-                url = "jdbc:mysql://localhost:3306/"; // No database selected initially
-            } else {
-                url = "jdbc:mysql://localhost:3306/" + dbName;
-            }
-            
-            System.out.println("Username : "+userid+" password : "+passWord);
-            
+            url = dbName == null ? "jdbc:mysql://localhost:3306/" : "jdbc:mysql://localhost:3306/" + dbName;
+
             // Establish connection
             Class.forName(path);
             con = DriverManager.getConnection(url, userid, passWord);
             st = con.createStatement();
-            
-         // Create database if it doesn't exist (after credentials are set)
+
+            // Create database if it doesn't exist
             if (dbName == null) {
                 createDatabase();
-                dbName = "collegemanagement"; // Now database exists, so update dbName
+                dbName = "collegemanagement"; 
             }
-            
         } catch (Exception e) {
             System.out.println("Error in database connection: " + e.getMessage());
             JOptionPane.showMessageDialog(null, "Error in database connection: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    
-    /**
-     * Ensures database connection is established before returning it.
-     */
-    public Connection getConnection() throws SQLException
-    {
- 	 //  return con;
- 	   if (con != null  && !con.isClosed() ) {
- 		   return con;
+    public Connection getConnection() throws SQLException {
+        if (con != null && !con.isClosed()) {
+            return con;
         }
         throw new SQLException("Connection is not established.");
     }
-    
-    
-    /**
-     * Load credentials from database.txt or prompt the user if the file is empty.
-     */
+
     private void loadCredentials() {
         File file = new File(FILE_PATH);
 
@@ -71,34 +58,22 @@ public class JdbcConnection3 {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 userid = reader.readLine();
                 passWord = reader.readLine();
-                dbName = "collegemanagement"; // Use database after credentials exist
+                dbName = "collegemanagement"; 
             } catch (IOException e) {
                 System.out.println("Failed to read credentials: " + e.getMessage());
             }
         } else {
-            // Prompt user for credentials on first run
             setCredentials();
         }
     }
 
-    /**
-     * Prompt the user to enter database credentials and save them in database.txt.
-     */
     private void setCredentials() {
-    	String username = userid;
-    	String password = passWord;
-    	
-    	
         Scanner scanner = new Scanner(System.in);
-    //    System.out.print("Enter database username (leave blank to use default: root): ");
-     //   userid = scanner.nextLine().trim();
-        if (username.isEmpty()) userid = "root";
 
-   //     System.out.print("Enter database password (leave blank to use default: 12345678): ");
-   //     passWord = scanner.nextLine().trim();
-        if (password.isEmpty()) passWord = "12345678";
+        if (userid == null || userid.isEmpty()) userid = "root";
+        if (passWord == null || passWord.isEmpty()) passWord = "12345678";
 
-        // Save credentials to the file
+        // Save credentials securely
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
             writer.write(userid);
             writer.newLine();
@@ -108,19 +83,14 @@ public class JdbcConnection3 {
         }
 
         System.out.println("Credentials saved successfully.");
+        secureFile(); // Secure after writing
     }
 
-    
-    public static void putCredential (String username, String password)
-    {
-    	userid = username;
+    public static void putCredential(String username, String password) {
+        userid = username;
         passWord = password;
-    	System.out.println("Username : "+userid+" password : "+passWord);
     }
-    
-    /**
-     * Creates the database "collegemanagement" after credentials are set.
-     */
+
     private void createDatabase() {
         try (Connection tempCon = DriverManager.getConnection("jdbc:mysql://localhost:3306/", userid, passWord);
              Statement tempSt = tempCon.createStatement()) {
@@ -134,9 +104,7 @@ public class JdbcConnection3 {
             JOptionPane.showMessageDialog(null, "Failed to create database: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    
-    // Returns the PreparedStatement
+
     public PreparedStatement prepareStatement(String query) throws SQLException {
         if (con != null) {
             return con.prepareStatement(query);
@@ -144,7 +112,6 @@ public class JdbcConnection3 {
         throw new SQLException("Connection is not established.");
     }
 
-    // Closes the connection and resources
     public void close() {
         try {
             if (con != null) con.close();
@@ -153,7 +120,34 @@ public class JdbcConnection3 {
         }
     }
 
+    /**
+     * Secures database.txt file from unauthorized access.
+     */
+    private void secureFile() {
+        File file = new File(FILE_PATH);
+        if (!file.exists()) return;
+
+        try {
+            // Windows & Linux: Make the file readable/writable ONLY by the owner
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                file.setReadable(false, false); // No read for others
+                file.setWritable(false, false); // No write for others
+                file.setExecutable(false, false);
+                Files.setAttribute(Paths.get(FILE_PATH), "dos:hidden", true);    // hide from normal user
+
+            } else {
+                // For Linux/macOS: Use POSIX permissions
+                Path path = file.toPath();
+                Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-------"));
+            }
+
+            System.out.println("File permissions secured: " + FILE_PATH);
+        } catch (UnsupportedOperationException | IOException e) {
+            System.out.println("Could not secure file: " + e.getMessage());
+        }
+    }
+
     // Uncomment for testing
-//    public static void main(String[] args) { new JdbcConnection4(); }
+    // public static void main(String[] args) { new JdbcConnection(); }
 }
 
