@@ -41,7 +41,7 @@ public class JdbcConnection {
                 dbName = "collegemanagement";
             }
         } catch (Exception e) {
-            System.out.println("Error in database connection: " + e.getMessage());
+           // System.out.println("Error in database connection: " + e.getMessage());
             JOptionPane.showMessageDialog(null, "Error in database connection: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -62,7 +62,8 @@ public class JdbcConnection {
                 passWord = decrypt(reader.readLine());
                 dbName = "collegemanagement";
             } catch (Exception e) {
-                System.out.println("Failed to read credentials: " + e.getMessage());
+                // System.out.println("Failed to read credentials: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Failed to read credentials: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             setCredentials();
@@ -80,10 +81,12 @@ public class JdbcConnection {
             writer.newLine();
             writer.write(encrypt(passWord));
         } catch (Exception e) {
-            System.out.println("Failed to save credentials: " + e.getMessage());
+           // System.out.println("Failed to save credentials: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Failed to save credentials: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        System.out.println("Credentials saved securely.");
+       // System.out.println("Credentials saved securely.");
+        JOptionPane.showMessageDialog(null, "Credentials saved securely!", "Success", JOptionPane.INFORMATION_MESSAGE);
         secureFile();
     }
 
@@ -98,10 +101,10 @@ public class JdbcConnection {
 
             String query = "CREATE DATABASE IF NOT EXISTS collegemanagement";
             tempSt.execute(query);
-            System.out.println("Database 'collegemanagement' created successfully.");
+         //   System.out.println("Database 'collegemanagement' created successfully.");
 
         } catch (SQLException e) {
-            System.out.println("Failed to create database: " + e.getMessage());
+           // System.out.println("Failed to create database: " + e.getMessage());
             JOptionPane.showMessageDialog(null, "Failed to create database: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -158,9 +161,10 @@ public class JdbcConnection {
                 Path path = file.toPath();
                 Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-------"));
             }
-            System.out.println("File permissions secured: " + FILE_PATH);
+          //  System.out.println("File permissions secured: " + FILE_PATH);
         } catch (UnsupportedOperationException | IOException e) {
-            System.out.println("Could not secure file: " + e.getMessage());
+           // System.out.println("Could not secure file: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Could not secure file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

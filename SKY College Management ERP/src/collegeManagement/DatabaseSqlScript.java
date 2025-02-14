@@ -76,9 +76,9 @@ public class DatabaseSqlScript {
 			     course VARCHAR(50) NOT NULL,
 			     BranchName VARCHAR(50) NOT NULL,
 			     Counter INT NOT NULL,
-			     PRIMARY KEY (Year, course, BranchName),
-			     FOREIGN KEY (course) REFERENCES Courses(course),
-			     FOREIGN KEY (BranchName) REFERENCES Branches(BranchName)
+			     PRIMARY KEY (Year, course, BranchName)
+			    --  FOREIGN KEY (course) REFERENCES Courses(course),
+			    --  FOREIGN KEY (BranchName) REFERENCES Branches(BranchName)
 			 )
 			 
 			 """ ,
@@ -120,7 +120,7 @@ public class DatabaseSqlScript {
 			   isphd VARCHAR(5) NOT NULL,
 			   role VARCHAR(50) default 'Teacher',
 			    doj DATE NOT NULL,
-			     designation VARCHAR(50),
+			    designation VARCHAR(50),
 			    PRIMARY KEY (srno)
 			 )
 			 

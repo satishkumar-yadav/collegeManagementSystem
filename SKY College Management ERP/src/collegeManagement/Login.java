@@ -299,11 +299,17 @@ public class Login extends JFrame implements ActionListener {
         lb0 = new JLabel(bg3);
         lb0.setBounds(00, 00, 1024, 768);
         add(lb0);
-         
+        
         setSize(950,700);
         setLocation(190,20);
         setVisible(true);
        
+        if ( isDatabaseVisible() == true  ) 
+        {
+        	JOptionPane.showMessageDialog(null, "You are running CMS for the first time, so Set the DataBase Credential First !!");
+            JOptionPane.showMessageDialog(null, "Enter DataBase UserName and PassWord, or leave it to use default UserName or PassWord..");
+        }
+        
 	}
 	
 	@Override
@@ -342,7 +348,6 @@ public class Login extends JFrame implements ActionListener {
 		else if (ae.getSource() == bdatabase )
 		{
 			 getCredential() ;
-			
 			
 			Database.createDatabaseSchema();
             disableDatabaseButton(); // Disable the button after it's clicked

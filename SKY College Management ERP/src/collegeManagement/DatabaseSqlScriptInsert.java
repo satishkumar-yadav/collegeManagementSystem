@@ -155,7 +155,7 @@ public class DatabaseSqlScriptInsert {
 			  
 			"  INSERT INTO studentleave (rollno, date, duration) VALUES ('24100101', '2024-12-23', 'Full Day'), ('25200201', '2025-12-23', 'Half Day')",
 
-			" INSERT INTO teacherleave (rollno, date, duration) VALUES ('24110101', '2024-12-23', 'Half Day'), ('25220201', '2025-12-23', 'Full Day')"
+			" INSERT INTO teacherleave (empid, date, duration) VALUES ('24110101', '2024-12-23', 'Half Day'), ('25220201', '2025-12-23', 'Full Day')"
 	            
 	    };
 	
