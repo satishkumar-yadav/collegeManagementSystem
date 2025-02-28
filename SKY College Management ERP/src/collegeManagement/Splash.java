@@ -16,14 +16,14 @@ public class Splash extends JFrame implements Runnable {
     	 lb1 = new JLabel("Welcome !! to ERP ");
          lb1.setBounds(250, 15, 350, 40);
          lb1.setBackground(Color.BLACK);
-         lb1.setForeground(Color.BLUE);
+         lb1.setForeground(Color.WHITE);
          lb1.setFont(new Font("Tahoma", Font.BOLD, 35));
          add(lb1);
          
          lb2 = new JLabel("College Management System ");
          lb2.setBounds(120, 50, 550, 40);
          lb2.setBackground(Color.BLACK);
-         lb2.setForeground(Color.BLUE);
+         lb2.setForeground(Color.WHITE);
          lb2.setFont(new Font("Tahoma", Font.BOLD, 35));
          add(lb2);
          
@@ -46,9 +46,9 @@ public class Splash extends JFrame implements Runnable {
          lb5.setForeground(Color.WHITE);
         // lb7.setBackground(Color.WHITE);
          lb5.setFont(new Font("Tahoma", Font.BOLD, 28));
-         add(lb5);
+       //  add(lb5);
     	
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/first.jpg"));
+        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/1.png"));
         Image i2 = i1.getImage().getScaledInstance(1000, 700, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel image = new JLabel(i3);

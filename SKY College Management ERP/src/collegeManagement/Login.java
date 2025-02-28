@@ -67,28 +67,28 @@ public class Login extends JFrame implements ActionListener {
         lb1 = new JLabel("Welcome !! to ERP ");
         lb1.setBounds(250, 15, 350, 40);
         lb1.setBackground(Color.BLACK);
-        lb1.setForeground(Color.BLUE);
+        lb1.setForeground(Color.WHITE);
         lb1.setFont(new Font("Tahoma", Font.BOLD, 35));
         add(lb1);
         
         lb9 = new JLabel("College Management System ");
         lb9.setBounds(120, 50, 550, 40);
         lb9.setBackground(Color.BLACK);
-        lb9.setForeground(Color.BLUE);
+        lb9.setForeground(Color.WHITE);
         lb9.setFont(new Font("Tahoma", Font.BOLD, 35));
         add(lb9);
         
         lb2 = new JLabel("Designed and Developed : ");
         lb2.setBounds(350, 100, 285, 30);
         lb2.setBackground(Color.BLACK);
-        lb2.setForeground(Color.RED);
+        lb2.setForeground(Color.CYAN);
         lb2.setFont(new Font("Serif", Font.BOLD, 25));
         add(lb2);
         
         lb10 = new JLabel(" By < BYTE CODERS & Group >");
         lb10.setBounds(605, 122, 500, 30);
         lb10.setBackground(Color.BLACK);
-        lb10.setForeground(Color.RED);
+        lb10.setForeground(Color.CYAN);
         lb10.setFont(new Font("Serif", Font.BOLD, 22));
         add(lb10);
         
@@ -198,13 +198,13 @@ public class Login extends JFrame implements ActionListener {
         
         lb11 = new JLabel("Trouble Logging in ??  ");
         lb11.setBounds(100, 500, 200, 30);
-        lb11.setForeground(Color.YELLOW);
+        lb11.setForeground(Color.WHITE);
         lb11.setFont(new Font("Tahoma", Font.BOLD, 17));
         add(lb11);
         
         lbnew = new JLabel("New Here ??  ");
         lbnew.setBounds(100, 530, 200, 30);
-        lbnew.setForeground(Color.YELLOW);
+        lbnew.setForeground(Color.WHITE);
         lbnew.setFont(new Font("Tahoma", Font.BOLD, 17));
         add(lbnew);
         
@@ -291,9 +291,9 @@ public class Login extends JFrame implements ActionListener {
         lb7.setForeground(Color.WHITE);
        // lb7.setBackground(Color.WHITE);
         lb7.setFont(new Font("Tahoma", Font.BOLD, 28));
-        add(lb7);
+       // add(lb7);
         
-        ImageIcon bg = new ImageIcon(ClassLoader.getSystemResource("images/third.jpg"));
+        ImageIcon bg = new ImageIcon(ClassLoader.getSystemResource("images/2.png"));
         Image bg2 = bg.getImage().getScaledInstance(1024, 768, Image.SCALE_DEFAULT);
         ImageIcon bg3 = new ImageIcon(bg2);
         lb0 = new JLabel(bg3);

@@ -47,7 +47,7 @@ public class Admin extends JFrame implements ActionListener {
    	 
        setTitle("Admin");
        
-       ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/third.jpg"));
+       ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("images/2.png"));
        Image i2 = i1.getImage().getScaledInstance(1350, 660, Image.SCALE_DEFAULT);
        ImageIcon i3 = new ImageIcon(i2);
        JLabel image = new JLabel(i3);
