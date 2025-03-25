@@ -1,0 +1,1440 @@
+Database Structure
+1.User Table (students, faculty, admins)
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('student', 'faculty', 'admin') NOT NULL
+);
+
+2.Student Table
+
+CREATE TABLE students (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNIQUE NOT NULL,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    course VARCHAR(100),
+    semester INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+3.Faculty Table
+
+CREATE TABLE faculty (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNIQUE NOT NULL,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    department VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+4.Notifications Table
+
+CREATE TABLE notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255),
+    message TEXT,
+    user_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+1. Database Setup
+- Create a users table in MySQL to store login credentials.
+
+CREATE DATABASE IF NOT EXISTS collegemanagement;
+
+USE collegemanagement;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('student', 'faculty', 'admin') NOT NULL
+);
+
+-- Sample Data
+INSERT INTO users (username, password, role) VALUES
+('student1', 'password123', 'student'),
+('faculty1', 'facultyPass', 'faculty'),
+('admin1', 'adminPass', 'admin');
+
+
+2. JDBC Connection Class
+- This class connects to MySQL.
+
+package collegeManagement;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class JdbcConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/collegemanagement";
+    private static final String USER = "root"; // Update with your MySQL username
+    private static final String PASSWORD = "12345678"; // Update with your MySQL password
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+
+
+
+
+1. Modify the Database Table to Store Encrypted Passwords
+- Since storing plain-text passwords is unsafe, we'll use SHA-256 hashing for security.
+
+- Modify Users Table (Recommended)
+
+ALTER TABLE users MODIFY password VARCHAR(255); -- To store hashed passwords
+
+
+2. Password Hashing Utility
+- This helper class will hash passwords using SHA-256.
+- passwordUtil java class
+
+
+4. Modify Login System to Verify Hashed Password
+- Since we store hashed passwords, we need to hash the user input and compare it.
+
+- Modify LoginSystem.java
+- Change the SQL query in the authenticateUser() method:
+
+java
+Copy
+Edit
+private void authenticateUser() {
+    String username = usernameField.getText().trim();
+    String password = new String(passwordField.getPassword()).trim();
+
+    if (username.isEmpty() || password.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please enter both username and password", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    String hashedPassword = PasswordUtil.hashPassword(password); // Hash entered password
+
+    try (Connection con = JdbcConnection.getConnection();
+         PreparedStatement pst = con.prepareStatement("SELECT role FROM users WHERE username=? AND password=?")) {
+        pst.setString(1, username);
+        pst.setString(2, hashedPassword); // Compare hashed password
+
+        ResultSet rs = pst.executeQuery();
+
+        if (rs.next()) {
+            String role = rs.getString("role");
+            JOptionPane.showMessageDialog(this, "Login successful as " + role);
+
+            if ("student".equals(role)) {
+                new StudentDashboard(username);
+            } else if ("faculty".equals(role)) {
+                new FacultyDashboard(username);
+            } else if ("admin".equals(role)) {
+                new AdminDashboard(username);
+            }
+
+            dispose(); // Close login window
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+
+1. Modify Database to Store Email
+Ensure the users table has an email column.
+
+sql
+Copy
+Edit
+ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE NOT NULL;
+
+
+3. Forgot Password UI (OTP Verification)
+This Swing UI lets users reset their password.
+
+ForgotPassword.java
+java
+Copy
+Edit
+package collegeManagement;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Random;
+
+public class ForgotPassword extends JFrame {
+    private JTextField emailField, otpField;
+    private JPasswordField newPasswordField;
+    private JButton sendOtpButton, verifyOtpButton, resetPasswordButton;
+
+    private String generatedOTP;
+    private String userEmail;
+
+    public ForgotPassword() {
+        setTitle("Forgot Password");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new GridLayout(5, 2));
+
+        JLabel emailLabel = new JLabel("Enter Registered Email:");
+        emailField = new JTextField();
+
+        sendOtpButton = new JButton("Send OTP");
+        sendOtpButton.addActionListener(e -> sendOtp());
+
+        JLabel otpLabel = new JLabel("Enter OTP:");
+        otpField = new JTextField();
+        otpField.setEnabled(false);
+
+        verifyOtpButton = new JButton("Verify OTP");
+        verifyOtpButton.setEnabled(false);
+        verifyOtpButton.addActionListener(e -> verifyOtp());
+
+        JLabel passwordLabel = new JLabel("New Password:");
+        newPasswordField = new JPasswordField();
+        newPasswordField.setEnabled(false);
+
+        resetPasswordButton = new JButton("Reset Password");
+        resetPasswordButton.setEnabled(false);
+        resetPasswordButton.addActionListener(e -> resetPassword());
+
+        add(emailLabel);
+        add(emailField);
+        add(sendOtpButton);
+        add(new JLabel()); // Empty space
+        add(otpLabel);
+        add(otpField);
+        add(verifyOtpButton);
+        add(new JLabel());
+        add(passwordLabel);
+        add(newPasswordField);
+        add(resetPasswordButton);
+
+        setLocationRelativeTo(null);
+    }
+
+    private void sendOtp() {
+        userEmail = emailField.getText().trim();
+
+        if (userEmail.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your registered email!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("SELECT * FROM users WHERE email=?")) {
+            pst.setString(1, userEmail);
+            ResultSet rs = pst.executeQuery();
+
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(this, "Email not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            generatedOTP = generateOTP();
+            EmailSender.sendEmail(userEmail, "Password Reset OTP", "Your OTP for password reset is: " + generatedOTP);
+            JOptionPane.showMessageDialog(this, "OTP sent to your email!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            otpField.setEnabled(true);
+            verifyOtpButton.setEnabled(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error sending OTP: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void verifyOtp() {
+        if (otpField.getText().trim().equals(generatedOTP)) {
+            JOptionPane.showMessageDialog(this, "OTP verified! Enter a new password.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            newPasswordField.setEnabled(true);
+            resetPasswordButton.setEnabled(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid OTP!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void resetPassword() {
+        String newPassword = new String(newPasswordField.getPassword()).trim();
+
+        if (newPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a new password!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String hashedPassword = PasswordUtil.hashPassword(newPassword);
+
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("UPDATE users SET password=? WHERE email=?")) {
+            pst.setString(1, hashedPassword);
+            pst.setString(2, userEmail);
+
+            int rowsUpdated = pst.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Password reset successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error resetting password!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private String generateOTP() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // Generates a 6-digit OTP
+        return String.valueOf(otp);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ForgotPassword().setVisible(true));
+    }
+}
+
+
+1️ Modify Database to Track OTP Attempts
+Run this SQL script to update the users table:
+
+sql
+Copy
+Edit
+ALTER TABLE users ADD COLUMN otp VARCHAR(6);
+ALTER TABLE users ADD COLUMN otp_expiry TIMESTAMP;
+ALTER TABLE users ADD COLUMN failed_attempts INT DEFAULT 0;
+
+
+2️ Updated Email Utility with Logging
+EmailSender.java
+This class sends OTP emails and logs OTP attempts.
+
+java
+Copy
+Edit
+package collegeManagement;
+
+import java.util.Properties;
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.sql.*;
+
+public class EmailSender {
+    private static final String SENDER_EMAIL = "your-email@gmail.com";  // Your email
+    private static final String SENDER_PASSWORD = "your-email-password"; // Your email password
+
+    public static void sendEmail(String recipientEmail, String subject, String messageBody) {
+        Properties properties = new Properties();
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(SENDER_EMAIL, SENDER_PASSWORD);
+            }
+        });
+
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(SENDER_EMAIL));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+            message.setSubject(subject);
+            message.setText(messageBody);
+
+            Transport.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void logOtpAttempt(String email) {
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE email=?")) {
+            pst.setString(1, email);
+            pst.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+3️ Secure Forgot Password UI
+ForgotPassword.java
+This updated UI prevents OTP spam and ensures strong passwords.
+
+java
+Copy
+Edit
+package collegeManagement;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Random;
+import java.util.regex.Pattern;
+
+public class ForgotPassword extends JFrame {
+    private JTextField emailField, otpField;
+    private JPasswordField newPasswordField;
+    private JButton sendOtpButton, verifyOtpButton, resetPasswordButton, resendOtpButton;
+
+    private String generatedOTP;
+    private String userEmail;
+
+    public ForgotPassword() {
+        setTitle("Forgot Password");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new GridLayout(6, 2));
+
+        JLabel emailLabel = new JLabel("Enter Registered Email:");
+        emailField = new JTextField();
+
+        sendOtpButton = new JButton("Send OTP");
+        sendOtpButton.addActionListener(e -> sendOtp());
+
+        JLabel otpLabel = new JLabel("Enter OTP:");
+        otpField = new JTextField();
+        otpField.setEnabled(false);
+
+        verifyOtpButton = new JButton("Verify OTP");
+        verifyOtpButton.setEnabled(false);
+        verifyOtpButton.addActionListener(e -> verifyOtp());
+
+        JLabel passwordLabel = new JLabel("New Password:");
+        newPasswordField = new JPasswordField();
+        newPasswordField.setEnabled(false);
+
+        resetPasswordButton = new JButton("Reset Password");
+        resetPasswordButton.setEnabled(false);
+        resetPasswordButton.addActionListener(e -> resetPassword());
+
+        resendOtpButton = new JButton("Resend OTP");
+        resendOtpButton.setEnabled(false);
+        resendOtpButton.addActionListener(e -> resendOtp());
+
+        add(emailLabel);
+        add(emailField);
+        add(sendOtpButton);
+        add(resendOtpButton);
+        add(otpLabel);
+        add(otpField);
+        add(verifyOtpButton);
+        add(new JLabel());
+        add(passwordLabel);
+        add(newPasswordField);
+        add(resetPasswordButton);
+
+        setLocationRelativeTo(null);
+    }
+
+    private void sendOtp() {
+        userEmail = emailField.getText().trim();
+
+        if (userEmail.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your registered email!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("SELECT failed_attempts, otp_expiry FROM users WHERE email=?")) {
+            pst.setString(1, userEmail);
+            ResultSet rs = pst.executeQuery();
+
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(this, "Email not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int failedAttempts = rs.getInt("failed_attempts");
+            Timestamp otpExpiry = rs.getTimestamp("otp_expiry");
+
+            if (failedAttempts >= 3) {
+                JOptionPane.showMessageDialog(this, "Too many failed attempts. Try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (otpExpiry != null && otpExpiry.toLocalDateTime().isAfter(LocalDateTime.now())) {
+                JOptionPane.showMessageDialog(this, "OTP already sent! Try again after a minute.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            generatedOTP = generateOTP();
+            EmailSender.sendEmail(userEmail, "Password Reset OTP", "Your OTP is: " + generatedOTP);
+
+            try (PreparedStatement updatePst = con.prepareStatement("UPDATE users SET otp=?, otp_expiry=? WHERE email=?")) {
+                updatePst.setString(1, generatedOTP);
+                updatePst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now().plus(1, ChronoUnit.MINUTES)));
+                updatePst.setString(3, userEmail);
+                updatePst.executeUpdate();
+            }
+
+            JOptionPane.showMessageDialog(this, "OTP sent to your email!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            otpField.setEnabled(true);
+            verifyOtpButton.setEnabled(true);
+            resendOtpButton.setEnabled(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error sending OTP: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void verifyOtp() {
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("SELECT otp FROM users WHERE email=?")) {
+            pst.setString(1, userEmail);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next() && otpField.getText().trim().equals(rs.getString("otp"))) {
+                JOptionPane.showMessageDialog(this, "OTP verified! Enter a new password.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                newPasswordField.setEnabled(true);
+                resetPasswordButton.setEnabled(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid OTP!", "Error", JOptionPane.ERROR_MESSAGE);
+                EmailSender.logOtpAttempt(userEmail);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void resetPassword() {
+        String newPassword = new String(newPasswordField.getPassword()).trim();
+
+        if (!isValidPassword(newPassword)) {
+            JOptionPane.showMessageDialog(this, "Password must be 8+ chars with uppercase, lowercase, number & special symbol!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try (Connection con = JdbcConnection.getConnection();
+             PreparedStatement pst = con.prepareStatement("UPDATE users SET password=?, failed_attempts=0 WHERE email=?")) {
+            pst.setString(1, newPassword);
+            pst.setString(2, userEmail);
+            pst.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Password reset successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private boolean isValidPassword(String password) {
+        return Pattern.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$", password);
+    }
+
+    private String generateOTP() {
+        return String.valueOf(100000 + new Random().nextInt(900000));
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ForgotPassword().setVisible(true));
+    }
+}
+
+This secure version prevents brute force and ensures strong passwords. Let me know if you need any changes! 
+
+
+2. Role-Based Permissions Implementation
+a. Define Roles and Access Levels
+- Create an enum for roles:
+
+java
+Copy
+Edit
+public enum UserRole {
+    ADMIN, TEACHER, STUDENT;
+}
+
+- Define which roles can access which features.
+
+b. Create a Database Table for User Roles
+SQL Query:
+
+sql
+Copy
+Edit
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN', 'TEACHER', 'STUDENT') NOT NULL
+);
+
+
+c. Implement Role-Based Access in Java
+When a user logs in, check their role and grant access accordingly.
+
+Example:
+
+java
+Copy
+Edit
+import java.sql.*;
+
+public class Authentication {
+    public static UserRole authenticateUser(String username, String password) {
+        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/collegemanagement", "root", "12345678");
+             PreparedStatement stmt = con.prepareStatement("SELECT role FROM users WHERE username=? AND password=?")) {
+            
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return UserRole.valueOf(rs.getString("role"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+d. Restrict Access Based on Role
+java
+Copy
+Edit
+public class Dashboard {
+    public void showDashboard(UserRole role) {
+        if (role == UserRole.ADMIN) {
+            System.out.println("Welcome, Admin! You have full access.");
+            // Show admin features
+        } else if (role == UserRole.TEACHER) {
+            System.out.println("Welcome, Teacher! Limited access granted.");
+            // Show teacher features
+        } else {
+            System.out.println("Welcome, Student! View-only access granted.");
+            // Show student features
+        }
+    }
+}
+
+
+1. Modify Database to Store User Roles
+If your users table does not have a role column, add it:
+
+sql
+Copy
+Edit
+ALTER TABLE users ADD COLUMN role ENUM('Admin', 'Faculty', 'Student') NOT NULL;
+Ensure roles are assigned when creating users.
+
+
+2. Create Role-Based Dashboards
+- Admin Dashboard (Full Access)
+java
+Copy
+Edit
+import javax.swing.*;
+
+public class AdminDashboard extends JFrame {
+    public AdminDashboard() {
+        setTitle("Admin Dashboard");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Welcome, Admin!"));
+
+        JButton manageUsers = new JButton("Manage Users");
+        JButton viewReports = new JButton("View Reports");
+        JButton settings = new JButton("Settings");
+
+        panel.add(manageUsers);
+        panel.add(viewReports);
+        panel.add(settings);
+
+        add(panel);
+    }
+}
+
+
+- Faculty Dashboard (Limited Access)
+java
+Copy
+Edit
+import javax.swing.*;
+
+public class FacultyDashboard extends JFrame {
+    public FacultyDashboard() {
+        setTitle("Faculty Dashboard");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Welcome, Faculty!"));
+
+        JButton takeAttendance = new JButton("Take Attendance");
+        JButton viewSchedule = new JButton("View Schedule");
+
+        panel.add(takeAttendance);
+        panel.add(viewSchedule);
+
+        add(panel);
+    }
+}
+
+
+- Student Dashboard (Minimal Access)
+java
+Copy
+Edit
+import javax.swing.*;
+
+public class StudentDashboard extends JFrame {
+    public StudentDashboard() {
+        setTitle("Student Dashboard");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Welcome, Student!"));
+
+        JButton viewAttendance = new JButton("View Attendance");
+        JButton viewGrades = new JButton("View Grades");
+
+        panel.add(viewAttendance);
+        panel.add(viewGrades);
+
+        add(panel);
+    }
+}
+
+
+3. Implement Role-Based Login Handling
+Modify your login system to check user roles and open the correct dashboard:
+
+java
+Copy
+Edit
+import javax.swing.*;
+import java.sql.*;
+
+public class Login {
+    public static void authenticate(String username, String password) {
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT role FROM users WHERE username=? AND password=?");
+            ps.setString(1, username);
+            ps.setString(2, password);  // Later, replace this with hashed password verification
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String role = rs.getString("role");
+
+                switch (role) {
+                    case "Admin":
+                        new AdminDashboard().setVisible(true);
+                        break;
+                    case "Faculty":
+                        new FacultyDashboard().setVisible(true);
+                        break;
+                    case "Student":
+                        new StudentDashboard().setVisible(true);
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(null, "Unknown Role!");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid credentials!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+Step 5: Secure Password Storage with BCrypt
+We'll enhance security by hashing passwords before storing them in the database and verifying them during login.
+
+1. Add BCrypt Library to Your Project
+If using Maven, add this dependency in pom.xml:
+
+xml
+Copy
+Edit
+<dependency>
+    <groupId>org.mindrot</groupId>
+    <artifactId>jbcrypt</artifactId>
+    <version>0.4</version>
+</dependency>
+If not using Maven, download BCrypt JAR from here and add it to your project.
+
+
+2. Modify User Registration to Hash Passwords
+When a new user registers, hash the password before storing it.
+
+java
+Copy
+Edit
+import org.mindrot.jbcrypt.BCrypt;
+import java.sql.*;
+
+public class RegisterUser {
+    public static void register(String username, String password, String role) {
+        try {
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt()); // Hash password
+
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+
+            PreparedStatement ps = con.prepareStatement("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
+            ps.setString(1, username);
+            ps.setString(2, hashedPassword); // Store hashed password
+            ps.setString(3, role);
+            
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("User registered successfully!");
+            } else {
+                System.out.println("Failed to register user.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+3. Modify Login to Verify Hashed Passwords
+During login, we retrieve the hashed password and compare it using BCrypt.
+
+java
+Copy
+Edit
+import org.mindrot.jbcrypt.BCrypt;
+import javax.swing.*;
+import java.sql.*;
+
+public class Login {
+    public static void authenticate(String username, String password) {
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT password, role FROM users WHERE username=?");
+            ps.setString(1, username);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String storedHashedPassword = rs.getString("password");
+                String role = rs.getString("role");
+
+                if (BCrypt.checkpw(password, storedHashedPassword)) { // Compare passwords securely
+                    JOptionPane.showMessageDialog(null, "Login Successful!");
+
+                    switch (role) {
+                        case "Admin":
+                            new AdminDashboard().setVisible(true);
+                            break;
+                        case "Faculty":
+                            new FacultyDashboard().setVisible(true);
+                            break;
+                        case "Student":
+                            new StudentDashboard().setVisible(true);
+                            break;
+                        default:
+                            JOptionPane.showMessageDialog(null, "Unknown Role!");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid credentials!");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "User not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+Step 6: Implement Attendance Tracking System
+Now, we’ll add an Attendance Tracking feature that allows faculty to mark student attendance, and students can view their attendance records.
+
+1. Database Table for Attendance
+Modify your database schema to store attendance records.
+
+sql
+Copy
+Edit
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    date DATE NOT NULL,
+    status ENUM('Present', 'Absent', 'Late') NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
+
+
+2. Java Model for Attendance
+Create a class to represent attendance records.
+
+java
+Copy
+Edit
+public class Attendance {
+    private int id;
+    private int studentId;
+    private int courseId;
+    private String date;
+    private String status;
+
+    public Attendance(int studentId, int courseId, String date, String status) {
+        this.studentId = studentId;
+        this.courseId = courseId;
+        this.date = date;
+        this.status = status;
+    }
+
+    // Getters and Setters
+    public int getStudentId() { return studentId; }
+    public void setStudentId(int studentId) { this.studentId = studentId; }
+    
+    public int getCourseId() { return courseId; }
+    public void setCourseId(int courseId) { this.courseId = courseId; }
+    
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+}
+
+
+
+3. Faculty Interface for Marking Attendance
+Faculty can mark attendance for students using a Swing UI.
+
+java
+Copy
+Edit
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class MarkAttendance extends JFrame {
+    private JComboBox<String> studentDropdown;
+    private JComboBox<String> courseDropdown;
+    private JComboBox<String> statusDropdown;
+    private JButton submitButton;
+
+    public MarkAttendance() {
+        setTitle("Mark Attendance");
+        setSize(400, 250);
+        setLayout(new GridLayout(4, 2));
+
+        studentDropdown = new JComboBox<>(new String[]{"Student 1", "Student 2", "Student 3"});
+        courseDropdown = new JComboBox<>(new String[]{"Math", "Science", "Computer Science"});
+        statusDropdown = new JComboBox<>(new String[]{"Present", "Absent", "Late"});
+        submitButton = new JButton("Submit");
+
+        add(new JLabel("Select Student:"));
+        add(studentDropdown);
+        add(new JLabel("Select Course:"));
+        add(courseDropdown);
+        add(new JLabel("Attendance Status:"));
+        add(statusDropdown);
+        add(new JLabel(""));
+        add(submitButton);
+
+        submitButton.addActionListener(this::markAttendance);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void markAttendance(ActionEvent e) {
+        String student = (String) studentDropdown.getSelectedItem();
+        String course = (String) courseDropdown.getSelectedItem();
+        String status = (String) statusDropdown.getSelectedItem();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO attendance (student_id, course_id, date, status) VALUES (?, ?, ?, ?)"
+            );
+            ps.setInt(1, getStudentId(student));
+            ps.setInt(2, getCourseId(course));
+            ps.setString(3, date);
+            ps.setString(4, status);
+
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Attendance Marked Successfully!");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error in marking attendance.");
+        }
+    }
+
+    private int getStudentId(String studentName) {
+        return switch (studentName) {
+            case "Student 1" -> 1;
+            case "Student 2" -> 2;
+            case "Student 3" -> 3;
+            default -> 0;
+        };
+    }
+
+    private int getCourseId(String courseName) {
+        return switch (courseName) {
+            case "Math" -> 101;
+            case "Science" -> 102;
+            case "Computer Science" -> 103;
+            default -> 0;
+        };
+    }
+
+    public static void main(String[] args) {
+        new MarkAttendance();
+    }
+}
+
+
+
+4. Student Interface to View Attendance Records
+Students can view their attendance records.
+
+java
+Copy
+Edit
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class ViewAttendance extends JFrame {
+    private JTable table;
+    private DefaultTableModel model;
+
+    public ViewAttendance(int studentId) {
+        setTitle("View Attendance");
+        setSize(500, 300);
+        setLayout(new BorderLayout());
+
+        model = new DefaultTableModel(new String[]{"Date", "Course", "Status"}, 0);
+        table = new JTable(model);
+        loadAttendanceData(studentId);
+
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void loadAttendanceData(int studentId) {
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT date, course_id, status FROM attendance WHERE student_id=?"
+            );
+            ps.setInt(1, studentId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("date"),
+                    getCourseName(rs.getInt("course_id")),
+                    rs.getString("status")
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getCourseName(int courseId) {
+        return switch (courseId) {
+            case 101 -> "Math";
+            case 102 -> "Science";
+            case 103 -> "Computer Science";
+            default -> "Unknown";
+        };
+    }
+
+    public static void main(String[] args) {
+        new ViewAttendance(1);
+    }
+}
+
+
+
+1. Database Queries for Reports
+Before coding, define SQL queries to generate reports.
+
+(a) Attendance Report for a Specific Student
+sql
+Copy
+Edit
+SELECT date, course_id, status FROM attendance WHERE student_id = ?;
+
+(b) Overall Course Attendance Report
+sql
+Copy
+Edit
+SELECT course_id, status, COUNT(*) AS count FROM attendance GROUP BY course_id, s
+
+
+
+2. Java Implementation for Reports
+(a) Student Attendance Report (Table View)
+This allows students to view their attendance report.
+
+java
+Copy
+Edit
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class StudentAttendanceReport extends JFrame {
+    private JTable table;
+    private DefaultTableModel model;
+
+    public StudentAttendanceReport(int studentId) {
+        setTitle("Your Attendance Report");
+        setSize(500, 300);
+        setLayout(new BorderLayout());
+
+        model = new DefaultTableModel(new String[]{"Date", "Course", "Status"}, 0);
+        table = new JTable(model);
+        loadAttendanceData(studentId);
+
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void loadAttendanceData(int studentId) {
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT date, course_id, status FROM attendance WHERE student_id=?"
+            );
+            ps.setInt(1, studentId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("date"),
+                    getCourseName(rs.getInt("course_id")),
+                    rs.getString("status")
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getCourseName(int courseId) {
+        return switch (courseId) {
+            case 101 -> "Math";
+            case 102 -> "Science";
+            case 103 -> "Computer Science";
+            default -> "Unknown";
+        };
+    }
+
+    public static void main(String[] args) {
+        new StudentAttendanceReport(1);
+    }
+}
+
+
+
+(b) Overall Course Attendance Report (Pie Chart)
+This generates an attendance percentage chart for courses using JFreeChart.
+
+Add JFreeChart Library
+Download JFreeChart: JFreeChart Library
+Add jfreechart.jar and jcommon.jar to your project.
+
+Implementation
+java
+Copy
+Edit
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
+import javax.swing.*;
+import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class CourseAttendanceReport extends JFrame {
+
+    public CourseAttendanceReport() {
+        setTitle("Course Attendance Report");
+        setSize(600, 400);
+        setLayout(new BorderLayout());
+
+        DefaultPieDataset dataset = loadAttendanceData();
+        JFreeChart chart = ChartFactory.createPieChart("Attendance Distribution", dataset, true, true, false);
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        add(chartPanel, BorderLayout.CENTER);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private DefaultPieDataset loadAttendanceData() {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT course_id, status, COUNT(*) AS count FROM attendance GROUP BY course_id, status"
+            );
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String label = getCourseName(rs.getInt("course_id")) + " - " + rs.getString("status");
+                dataset.setValue(label, rs.getInt("count"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return dataset;
+    }
+
+    private String getCourseName(int courseId) {
+        return switch (courseId) {
+            case 101 -> "Math";
+            case 102 -> "Science";
+            case 103 -> "Computer Science";
+            default -> "Unknown";
+        };
+    }
+
+    public static void main(String[] args) {
+        new CourseAttendanceReport();
+    }
+}
+
+
+1. Database Table for Payroll
+First, create a payroll table in MySQL:
+
+sql
+Copy
+Edit
+CREATE TABLE payroll (
+    employee_id INT PRIMARY KEY,
+    base_salary DECIMAL(10,2),
+    bonus DECIMAL(10,2),
+    deductions DECIMAL(10,2),
+    net_salary DECIMAL(10,2),
+    payment_date DATE,
+    FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+
+
+2. Java Implementation for Payroll
+(a) Salary Calculation Logic
+This method calculates the net salary after bonuses and deductions.
+
+java
+Copy
+Edit
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
+
+public class PayrollProcessor {
+
+    public static void calculateSalary(int employeeId) {
+        try {
+            JdbcConnection jdbc = new JdbcConnection();
+            Connection con = jdbc.getConnection();
+
+            // Fetch salary details
+            String query = "SELECT base_salary, bonus, deductions FROM payroll WHERE employee_id = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, employeeId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                double baseSalary = rs.getDouble("base_salary");
+                double bonus = rs.getDouble("bonus");
+                double deductions = rs.getDouble("deductions");
+
+                // Calculate net salary
+                double netSalary = baseSalary + bonus - deductions;
+
+                // Update database with net salary
+                String updateQuery = "UPDATE payroll SET net_salary = ?, payment_date = ? WHERE employee_id = ?";
+                PreparedStatement updatePs = con.prepareStatement(updateQuery);
+                updatePs.setDouble(1, netSalary);
+                updatePs.setDate(2, new java.sql.Date(new Date().getTime()));
+                updatePs.setInt(3, employeeId);
+                updatePs.executeUpdate();
+
+                System.out.println("Salary updated successfully for Employee ID: " + employeeId);
+            } else {
+                System.out.println("Employee ID not found in payroll database.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        calculateSalary(1);
+    }
+}
+
+
+
+(b) Payroll Dashboard (Swing UI)
+This GUI allows admins to manage payroll details.
+
+java
+Copy
+Edit
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class PayrollDashboard extends JFrame {
+    private JTextField empIdField, baseSalaryField, bonusField, deductionField;
+    private JLabel netSalaryLabel;
+
+    public PayrollDashboard() {
+        setTitle("Payroll Management");
+        setSize(400, 300);
+        setLayout(new GridLayout(6, 2));
+
+        add(new JLabel("Employee ID:"));
+        empIdField = new JTextField();
+        add(empIdField);
+
+        add(new JLabel("Base Salary:"));
+        baseSalaryField = new JTextField();
+        add(baseSalaryField);
+
+        add(new JLabel("Bonus:"));
+        bonusField = new JTextField();
+        add(bonusField);
+
+        add(new JLabel("Deductions:"));
+        deductionField = new JTextField();
+        add(deductionField);
+
+        JButton calculateBtn = new JButton("Calculate Salary");
+        calculateBtn.addActionListener(new CalculateSalaryListener());
+        add(calculateBtn);
+
+        netSalaryLabel = new JLabel("Net Salary: -");
+        add(netSalaryLabel);
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private class CalculateSalaryListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int empId = Integer.parseInt(empIdField.getText());
+            double baseSalary = Double.parseDouble(baseSalaryField.getText());
+            double bonus = Double.parseDouble(bonusField.getText());
+            double deductions = Double.parseDouble(deductionField.getText());
+
+            double netSalary = baseSalary + bonus - deductions;
+            netSalaryLabel.setText("Net Salary: " + netSalary);
+
+            try {
+                JdbcConnection jdbc = new JdbcConnection();
+                Connection con = jdbc.getConnection();
+                String query = "INSERT INTO payroll (employee_id, base_salary, bonus, deductions, net_salary, payment_date) " +
+                               "VALUES (?, ?, ?, ?, ?, NOW()) " +
+                               "ON DUPLICATE KEY UPDATE base_salary=?, bonus=?, deductions=?, net_salary=?, payment_date=NOW()";
+                PreparedStatement ps = con.prepareStatement(query);
+                ps.setInt(1, empId);
+                ps.setDouble(2, baseSalary);
+                ps.setDouble(3, bonus);
+                ps.setDouble(4, deductions);
+                ps.setDouble(5, netSalary);
+                ps.setDouble(6, baseSalary);
+                ps.setDouble(7, bonus);
+                ps.setDouble(8, deductions);
+                ps.setDouble(9, netSalary);
+                ps.executeUpdate();
+
+                JOptionPane.showMessageDialog(null, "Salary Updated Successfully!");
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new PayrollDashboard();
+    }
+}
+
+
+3. Role-Based Access
+HR/Admins can edit payroll details via PayrollDashboard.java.
+
+Employees can view their payslip via PayslipGenerator.java (to be implemented next).
+
+
+
